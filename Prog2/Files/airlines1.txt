@@ -1,0 +1,48 @@
+16
+Delta
+United
+Northwest
+Canjet
+Air Canada
+Aero Mexico
+OceanAir
+Aria
+Lufthansa
+Quantas
+British Airways
+Air Alaska
+BMI
+Avolar
+EVA Air
+Girjet
+
+3 5 6 7
+5 8 9 7 10 11
+4 12 13 14 15
+1 16
+3 6 1 12
+3 1 5 11
+2 1 2
+1 2
+1 2
+1 2
+2 2 6
+2 5 3
+1 3
+1 3
+1 3
+1 4
+
+12
+1 9
+3 12
+14 16
+9 2
+3 6
+7 10
+2 6
+9 15
+1 16
+4 5
+8 11
+13 1

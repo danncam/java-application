@@ -1,0 +1,619 @@
+http://javafree.org/
+Capítulo 1 - Fundamentos da Linguagem Java
+
+Palavras-Chave
+
+Na linguagem Java, 49 são as palavras chaves e você deverá memorizá-las.
+
+byte - short - int - long - char - boolean
+double - float - public - private - protected
+static - abstract - final - strictfp - transient
+synchronized - native - void - class - interface
+implements - extends - if - else - do
+default - switch - case - break - continue
+assert - const - goto - throws - throw
+new - catch - try - finally - return
+this - package - import - instaceof
+while - for - volatile - super
+
+LEMBRE-SE: null, false, true (Não são palavras chaves, são valores literais!)
+
+
+Tipos primitivos:
+
+byte - Inteiro de 8 bits com sinal
+short - Inteiro de 16 bits com sinal
+int - Inteiro de 32 bits com sinal
+long - Inteiro de 64 bits com sinal
+char - Caracter Unicode (16 bits sem sinal)
+float - Ponto flutuante de 32 bits com sinal
+double - Ponto flutuante de 64 bits com sinal
+boolean - Valor indicando true ou false
+
+Modificadores de acesso:
+
+private - Define que um método ou variavel seja acessada somente pela própria classe
+protected - Faz com que uma subclasse acesse um membro da superclasse, mesmo estando em pacotes diferentes
+public - Faz com que um identificador possa ser acessado de qualquer outra classe.
+
+Modificadores de classe, métodos e variável:
+
+abstract - Define uma classe abstrata
+class - Define a implementação de uma classe
+extends - Define qual a hierarquia de classes, quem é a superclasse
+final - Faz com que um identificador não possa ser alterado
+implements - Faz com que uma classe implemente todos os métodos de uma interface
+interface - Define uma interface
+native - Define que o método será escrito em linguagem nativa como C, C++
+new - Instancia um novo objeto na pilha
+static - Defina um identificado de classe e não de instância
+strictfp - Define que o método esta segundo o padrao IEE754
+synchronized - Define que um método só poderá ser acessado por uma única thread por vez
+transient - Faz com que uma variável não seja serializada
+volatile - Indica que uma variável pode não ficar sincronizada ao ser usada por threads
+
+Controle de Fluxo:
+
+break - Faz com que o fluxo seja desviado para o fim do bloco
+continue - Muda o curso do fluxo para a proxima iteracao do loop
+if - Testa o valor lógico de uma condição
+else - Indica qual o bloco que deverá ser executado caso o teste feito pelo if seja falso
+default - Bloco que será executado caso nenhuma condição case satisfaça o swicth
+switch - Iniciar uma sequencia de testes para uma variavel a ser testada pelo case
+case - Testa o valor de uma variavel indicada pelo switch
+for - Usado para executar um bloco quantas vezes forem necessárias para satisfazer sua condição
+do - Executa um bloco quantas vezes a condição se fizer verdadeira. A condição é testada depois do bloco
+while - Executa um bloco quantas vezes a condição se fizer verdadeira. A condição é testada antes do bloco
+return - Finaliza a execução de um método, podendo opcionalmente retornar um valor
+instanceof - Testa se um objeto é instancia de uma classe qualquer
+
+Tratamento de erros:
+
+catch - Define o bloco de decisão que executará se por acaso ocorrer no bloco try uma exceção pré-definida
+finally - Bloco que sempre será executado, mesmo que uma exceção seja lançada
+throw - Lança uma exceção
+throws - Indica que um método pode lançar algum tipo de exceção
+try - Iniciar um bloco com auditoria
+assert - Usado no projeto, testa uma expressão para verificar alternativas para o programador.
+
+Controle de pacotes:
+
+import - Importa uma ou todas as classes de um pacote
+package - Define que a(s) classes farão parte de um pacote;
+
+Variáveis/Herança:
+
+super - Refere-se a superclasse imediata
+this - Refere-se a instância do objeto
+
+Retorno:
+
+void - Define que um método não retorna nada
+
+Reservadas mas não utilizadas:
+
+const - Não use para definir uma variável, use final
+goto - Não serve para nada
+
+Tipo primitivos:
+
+Você precisará saber "tudo" sobre os tipos primitivos, suas faixas de valores, valores padrões, conversões implicitas e explícitas, e muito mais.
+Por isso, prepare-se o seu pesadelo começou! Mas não se preocupe, com um pouco de fé e perseverança, tudo se resolve!
+
+A Java é composta por 8 (oito) tipos primitivos, e como você já deve ter percebido, todos começam com letras minúsculas (pois também são palavras chaves), portanto se você for tiver que responder uma pergunta onde aparece perguntando por exemplo se String é um tipo primitivo, não hesite em responder que NÃO!
+Outro conceito importante sobres os tipos primitivos em Java é que todos os tipos numéricos tem sinal. Mas o que isso significa? - deve ter vindo à sua mente! Significa que podem ser negativos ( - ) ou positivos ( + ), ou seja, o tipo int pode ter o numero -1 como tambem o numero +1. Observe a tabela de valores abaixo:
+
+
+tipo          bits          fórmula                     faixa
+byte            8          -2^7  à 2^7 -1            -128 ~ +127
+short          16         -2^15 à 2^15 - 1           -32768 a +32767
+int            32         -2^31 à 2^31-1            -2147483648 a +2147483647
+long           64         -2^63 à 2^63-1    -9223372036854775808 a +9223372036854775807
+
+
+Dica sem ônus: Lembre-se da palavrinha bsil (já está no aurélio), que indica os tipos b-byte, s-short, i-int, l-long ! Pois "1 byte é representado por 8 bits", isso até Hitler morreu sabendo!
+
+
+Entendendo essa fórmula maluca...
+
+Você deve estar se perguntando, porque deve elevar a 7 (sete) no caso do byte e não a 8 (oito), certo ? 1 Bit é usado para guardar o sinal. E porque só subtrai -1 da faixa positiva ? Porque o zero é incluído no intervalo também.
+Se ainda ficou confuso, vamos fazer um teste. Um regra nós sabemos: o tipo byte em Java é representado por oito bits. Se 1 bit é usado para guardar o sinal (+) ou (-), então sobrou 7 bits para representar um número.
+Se convertermos o número +125 em bits teremos 1111101 e ficaria representado da seguinte forma: 01111101 (observe que o zero inicial indica que é um numero positivo, estranho mas se o primeiro digito fosse um 1, seria um numero negativo).
+Agora se convertermos o numero +128 em bits, teremos 10000000, como esse numero é composto por oito bits não é possível adicionar o bit do sinal portanto o numero 128 positivo não está no intervalo do tipo byte, e está na faixa negativa pois o bit mais significativo a esquerda é 1 que indica sinal negativo.
+Quais os bits representam o numero 127 ? (1111111)
+
+
+Tipos primitivos (não acabou):
+
+Os demais tipos primitivos são: char, float, double, boolean !
+
+char - É representado por caracter Unicode de 16 bits (sem sinal). Tambem pode ser representado por um numero inteiro de 16 bits sem sinal, ou seja, pode-se atribuir à uma variavel char o valor 100 ou 14555 ou 65535, mas não 65536 !
+Pois essa é a faixa de valores da tabela Unicode para representação de caracteres de qualquer idioma. Mas a unica coisa que você precisa saber é a faixa de valores do tipo char. 2 ^ 16 - 1 = 65535 (valores possíveis).
+
+float - É um tipo numérico ponto flutuante de 32 bits (COM SINAL) !! Apesar de ter um tamanho definido por 32 bits, não é necessário saber a faixa de valores.
+
+double - É um tipo numérico ponto flutuante de 64 bits (COM SINAL) ! Apesar de ter um tamanho definido por 64 bits, não é necessário saber a faixa de valores.
+
+boolean - Um valor que indicado pelos valores literais: true ou false.
+
+
+Conversões implicitas/explícitas:
+
+Você pode sempre que precisar, fazer conversões entre os tipos numéricos, mas uma regra não pode ser quebrada: nunca você poderá converter um tipo de maior valor (bits) em um número de menos valor.
+
+Por exemplo:
+1. public class Convert {
+2.      public static void main(String[] args) {
+3.      int x = 10;
+4.      long y = 20;
+5.      y = x;       // perfeitamente possível
+6.      x = y;       // não é possível
+7.      x = (int) y;    // quero correr o risco e deixa eu queto !
+8.      }
+9. }
+
+
+Na linha 5 houve um conversão implicita perfeitamente possível pois o tipo da variavel y é long, ou seja, maior que o tipo da variavel x.
+Na linha 6 houve um tentativa de conversão, mas o compilador não permitira essa operação, pois o tipo long é maior que int.
+Na linha 7,uma conversão explícita foi realizada e o compilador gentilmente atendeu a solicitação do programador.
+
+
+Literais Inteiros:
+
+Um valor literal em Java é um valor escrito no código fonte e identificado como um tipo primitivo como por exemplo:
+
+int x = 10;       // literal inteiro
+char u = 'k';          // literal char
+boolean b = false;       // literal boolean
+double d = 9832.11;       // literal double
+
+
+Há três maneiras de representar valores inteiros em Java: octal (base 8), decimal (base 10) e hexadecimal (base 16)
+
+public class Octal {
+    public static void main(String[] args) {
+    int seis = 06;  // idem ao decimal 6
+    int sete = 07;  // idem ao decimal 7
+    int oito = 010; // idem ao decimal 8
+    int nove = 011; // idem ao decimal 9
+    }
+}
+
+
+Ou seja, se você ver o numero 0 antes de um número, saiba que está representando um número octal.
+
+public class Hexadecimal {
+    public static void main(String[] args) {
+    int quinze = 0xF;          // 15 (decimal)
+    int vinte_e_nove = 0x1D;      // 29 (decimal)
+    int vinte_e_nove = 0x1D;      // 29 (decimal)
+    int valor = 0xBAFAFA;      // 12253946 (decimal)
+    int valor = 0XBaFaFa;      // 12253946 (decimal)
+    }
+}
+
+
+Deve vir precedido do sufixo (0x) ! É um dos poucos casos na linguagem em que não importa se as letras forem maiúsculas ou minúsculas. Todos os tipos inteiros literais (tanto octal quanto hexa) são por padrão definidos como int, portanto se ver no exame um questão que atribui a uma variavel menor que int (em bits) isso dará erro de compilação. Veja o código a seguir:
+
+1. public class ConversaoHexa {
+2.      public static void main(String[] args) {
+3.      int  a = 0xbafa;    // ok, sem conversão
+4.      long b = 0xfff;     // ok, conversão implicita
+5.      long c = 0xfffL;     // ok, conversão explícita
+6.      byte d = 0xf;   // ok, conversão implícita
+7.      byte e = 0xff;    // erro! - 255 não é comportado
+8.      byte f = (int)0xff;   // erro! - 255 não é comportado
+9.      }
+10.}
+
+
+Na linha 6 o compilador sabe que F em hexa equivale a 15, o que pode ser perfeitamente suportado no tipo byte, então ele realiza a conversão.
+Na linha 7 o compilador sabe que FF em hexa equivale a +255 o que não pode ser suportado, por isso, erro!
+Na linha 8 o compilador só não xinga o programador por conflito de drivers entre seu sistema operacional com sua placa de som, ou seja, mas intimamente ele fala: CARA OLHA O QUE VOCÊ ESTÁ QUERENDO ME FORÇAR A FAZER !!! (%#%$!#%)
+
+
+Literais de ponto flutuante:
+
+Um valor literal de ponto flutuante por padrão em Java é definido com double de 64 bits, portanto de você quiser atribuir um valor literal float você deverá adicionar o sufixo f no final do valor como o exemplo:
+
+1.public class Teste {
+2.      public static void main(String[] args) {
+3.      double a = 9223372036854775807.0; // ok tipo double
+4.      float b = 2147483647; // ok, tipo int para float conversão implicita
+5.      float c = 2147483647.0;    // erro! double -> float
+6.      float d = (float)2147483647.0;    // ok - conversão
+7.      float e = 2147483647.0f;    // ok
+8.      }
+9.}
+
+
+Na linha 4, funciona pois 2147483647 é um literal int e não double! Não tem decimal !
+Na linha 5, o compilador reclamará pois 2147483647.0 é um tipo double (o padrão dos literais de ponto flutuante) não pode ser atribuído a uma variável float.
+Na linha 6 é feito uma conversão explícita.
+Na linha 7 é atribuído um valor float por causa do sufixo f
+
+Literais booleanos:
+
+Os valores literais booleanos são compreendidos entre true ou false e só !
+
+public class LitBoo {
+        public static void main(String[] args) {
+        boolean a = true;   // ok
+        boolean b = false;   // ok
+        boolean c = 1;       // erro de compilacao
+        }
+}
+
+
+Cuidado que em Java diferentemente de C e outras linguagens não se pode atribuir o valor 0 ou 1 para literais booleanos.
+
+Literais Caracteres:
+
+Os valores literais caracteres são compreendidos com um único caracter entre apóstrofo - se você não sabe o que é apóstrofo, é o mesmo que aspas simples '
+
+public class Carac {
+    public static void main(String[] args) {
+    char a = 'a';      // ok
+    char b = '@';       // ok
+    char c = '\u004E';       // refere-se a letra N
+    }
+}
+
+
+Como foi falado, o tipo char nada mais é do que um tipo inteiro sem sinal de 16 bits, portanto você poderá atribuir 2 ^ 16 - 1 = 65535. Veja no código abaixo:
+
+public class A {
+    public static void main(String[] args) {
+    char a = 65;
+    char b = (char)-65;      // fora do intervalo, precisa de conversão
+    char c = (char)70000; // fora do intervalo, precisa de conversão
+    }
+}
+
+
+O tipo char pode aceitar valores fora de sua faixa, desde haja uma conversão explícita.
+
+ARRAY
+
+Um array em Java é um objeto criado na pilha (mémoria), usado para armazenar e trabalhar com elementos semelhantes por seu tipo.
+Para que se possa utilizar um array você deverá:
+
+Declarar - Especificar um nome e o tipo do array.
+Construir - Informar o tamanho do array, ou seja, numero de elementos.
+Inicializar - Atribuir valores aos elementos do array.
+
+Declarando um array
+
+int[] a; // Recomendado
+Thread b[];
+String []c;
+
+Observe que ainda não se sabe quantos elementos esses array armazenará, ou seja, não sabe qual será o custo para a memória desse array. Nunca coloque a quantidade de elementos do array no passo de declaração, a não ser que você faça tudo em uma única linha (isso será mostrado posteriormente). Se você ver uma questão onde aparece algo como no trecho a seguir, marque sempre erro de compilação.
+
+int[3] a; // só pode mencionar a quantidade de elementos, na construção :shock:
+
+Construindo um array
+
+int[] a = new int[3]; // Recomendado :o
+Thread b[] = new Thread[1];
+String []c = new String[19];
+
+Usa-se a palavra new conjugada com o tipo do array. Nunca se esqueça, em Java a contagem dos elementos SEMPRE COMEÇARÁ EM 0 (ZERO), portando uma referência ao elemento a[3] (no array a acima) causará um erro, pois só existem os elementos 0, 1, 2 -> com um total de 3 elementos. Esse passo reserva espaço na memória para os elementos do objeto array, pois somente na construção que a JVM saberá quantos elementos serão composto o array, com isso cria-se um objeto na pilha com espaço necessário para armazenar os elementos do objeto. No passo de construção, todos os elementos são inicializados com seus valores padrão. Veja a tabela a seguir:
+
+TIPO VALOR PADRÃO
+byte 0
+short 0
+int 0
+long 0
+float 0.0
+double 0.0
+boolean false
+char '\u0000'
+Object null
+
+Inicializando um array
+
+Atribuir valores aos elementos de um objeto array. Quando um array é contruído, seus elementos são automaticamente inicializados com seus valores padrão.
+
+int[] x; // declarado
+x = new int[2]; // construindo
+x[0] = 10;	// inicializando
+x[1] = 20;	// inicializando
+
+Observe o seguinte código:
+
+1.public class ArrayInicia {
+2.public static void main(String[] args) {
+3.float[] f;
+4.f = new float[1];
+5.System.out.println("valor antes "+f[0] );
+6.f[0] = 9.0;
+7.System.out.println("valor depois "+f[0] );
+8.}
+9.}
+
+
+O que será impresso na linha 5 e 7 ??? ( Feche os olhos e responda !!, Não vale olhar...) Se você respondeu 0.0 e 9.0, parabéns por você ser uma pessoa de opnião! Mas infelizmente você errou !!! Lembra-se que todo valor literal ponto flutuante em Java é por padrão double, portanto esse código não compila. Se alterarmos esse código e adicionar o sufixo f na linha 6 => f[0] = 9.0f;, o resultado seria 0.0 e 9.0, por isso: PRESTE MAIS ATENÇÃO !!! :x
+
+Os três passos para a utilização de um array: declaração, construção e inicialização podem ser realizados em uma única linha de código. EUREKA !!! :!:
+
+boolean[] c = { false, true, false };
+int[] a = {0,1,1,1};
+char[] b = {'a','b','c'};
+
+Observe que a palavra chave new não foi utilizada, visto que está implícito o tipo no início, o número de elementos entre as chaves { }. Caso você se depare com uma questão (como o código abaixo) que especifica o número de elementos juntamente com a inicialização na mesma linha, não hesite em marcar a resposta: Erro de compilação !!!
+
+int[3] a = {1, 2, 1}; // erro de compilação :x
+
+Array Multidimensional
+
+Um array multidimensional é um array com mais de uma dimensão (isso é ridículo de dizer!), ou seja, é uma coleção de objetos array dentro de um objeto array. Portanto um array definido como: int[][] i = new int[3][]; nada mais é do que um objeto array i que contém três objeto array (ainda não construído) dentro. (Complicado?)
+
+int[][] i = new int[2][];
+
+O que isso significa ? O que são os elementos de i ?? Significa que foi criado um objeto na pilha chamado a, e seus elementos ainda não foram contruídos. Para utilizar seus elementos, você deverá construí-los como mostra o código a seguir:
+
+i[0] = new int[2]; // construído o elemento 0 do array i
+i[1] = new int[3]; // construído o elemento 1 do array i
+
+Quantos objetos foram criados na pilha ?
+
+1 referenciado por a
+2 referenciados por a[0] e a[1]
+
+Total de objetos criados: 3 (três)
+
+Agora observe o seguinte código:
+
+public class TestArray {
+public static void main(String[] args) {
+String s = new String("Kuesley");
+String[] nomes = { s, null, new String("Kuesley") };
+}
+}
+
+
+Quantos objetos foram criados na pilha ?? :shock:
+
+1 obj String referencido por s
+1 obj array de String referenciado por nomes
+1 obj String referenciado por nomes[2]
+
+Observe que o elemento 0 é apenas uma referência para s portanto não é criado um novo objeto. O elemento 1 não tem um objeto referenciado, já o elemento 2 é um objeto String.
+
+
+Array Anônimo
+
+Como o próprio nome já diz, é um objeto array criado sem a definição de um nome. Imagine que você precise passar um objeto array como parâmetro para um método, e você não queira criar um array, basta passar anonimamente. Veja como no código abaixo:
+
+public class A {
+public static void main(String[] args) {
+A obj_a = new A();
+int soma = obj_a.somarArray( new int[] { 0,1,2,3 } );
+System.out.println("Soma do array é: "+soma);
+}
+public int somarArray( int[] a ) {
+int rc = 0;
+for ( int i=0; i < a.length; i++) {
+rc += a[i];
+}
+return rc;
+}
+}
+
+
+Observe que não foi criado um objeto array com um identificador específico e passado como parâmetro, foi criado no momento em que se passará o argumento.
+
+Outro exemplo:
+
+int[][] numeros = new int[3][];
+numeros[0] = new int[10];
+numeros[1] = numeros[0];
+numeros[2] = new int[] { 0,1,2,3 };
+
+
+LEMBRE-SE: NUNCA ESPECIFIQUE O TAMANHO ENTRE OS COLCHETES, ISSO SERÁ DEDUZIDO DOS ELEMENTOS ENTRE O PAR DE CHAVES !!!
+
+Array - Observações
+
+Algumas regras devem ser consideradas no uso de array que referenciam objetos!
+
+Dado as classes:
+
+class Car implements CarMove { }
+class Mazda extends Car { }
+class Fusca extends Car { }
+class VMax { }
+interface CarMove { }
+
+1. public class Test {
+2. public static void main(String[] args) {
+3. Car[] cars = new Car[3];
+4. Fusca f = new Fusca();  // instanciando um obj do tipo Fusca
+5. cars[0] = f;
+6. }
+7. }
+
+
+Observe que na linha 5, um objeto Fusca foi armazenado em um array do tipo Car. Por que isto é possivel ?
+Existe um pergunta que você sempre deverá fazer, para saber se uma classe X pode ser armazenada em um array do tipo Y.
+
+X é membro de Y
+
+Em nosso contexto: Fusca é membro de Car ?
+Em outras palavras, Fusca é uma subclasse de Car ?
+Se a resposta for positiva, essa atribuição é perfeitamente possível !
+
+Agora observe o seguinte código (baseando-se nas mesmas classes Car, Fusca ):
+
+
+1. public class Test {
+2. public static void main(String[] args) {
+3. Fusca[] fuscas = new Fusca[3];
+4. Car c = new Car();
+5. fuscas[0] = c;
+6. }
+7. }
+
+
+Isso é possível ?? Se tem dúvida, faça você mesmo e faça o teste e sem preguiça !!!
+
+Aproveite e teste o seguinte:
+
+
+1. public class Test {
+2. public static void main(String[] args) {
+3. Car[] c = new Fusca[1];
+4. Fusca[] f = new Car[1];
+5. }
+6. }
+
+
+O que acontecerá com o código acima ?
+
+Mudando um pouco de assunto!
+
+Um objeto array de uma interface, pode receber referencias de instâncias de classes que implementem essa interface.
+
+public class Test {
+public static void main(String[] args) {
+CarMove[] cm = new CarMove[4];
+cm[0] = new Car();    // ok! Car implementa CarMov
+cm[1] = new Fusca();  // ok! Fusca implementa CarMov
+cm[2] = new Mazda();  // ok! Mazda implementa CarMov
+cm[3] = new VMax(); // erro de compilação
+}
+}
+
+
+LEMBRE-SE: Vmax é membro de CarMove ???
+
+Cuidado com detalhes de atribuições tais como:
+
+int[] n = new int[10];
+int[] m = new int[] {8,2,1,2,0};
+n = m; // ok! mesmo tipo
+
+int[][] n = new int[3][];
+int[] m = new int[] {1,2,3};
+n = m; // erro! objetos diferentes
+
+A JVM não elimina o objeto n da pilha e subtitui pelo valor de m!
+Observe também que o array n tem 2 dimensões, enquanto que m tem apenas uma!
+
+Porém o seguinte código seria perfeitamente possível:
+
+n[0] = m; // ok!
+
+As questões relacionadas com array multidimensionais são esdrúxulas, portanto ESTUDE! :D
+Se achas que estou brincando imagine a seguinte questão ?
+
+1. public class Test {
+2. public static void main(String[] args) {
+3. int[][][] nums = new int[2][][];
+4. int[] simple = new int[] {1,2,3,4,5};
+5. nums[0] = new int[1][];
+6. nums[0][0] = new int[10];
+7. nums[1] = new int[3][];
+8. nums[1][0] = simple;
+9. nums[1][1] = new int[] { 3,3,3 };
+10.nums[1][2] = new int[] { 1,2,3 };
+11.????
+12.}
+13.}
+
+
+1) Qual das linhas abaixo poderão ser colocadas na linha 11 do código acima sem que dê erro de compilação ?? (marque mais de uma) :shock:
+
+a) nums[1][0] = nums[0][0];
+b) nums[1][0] = 10;
+c) nums[1][0][3] = 9;
+d) nums[1][0][2] = 9;
+e) nums[0][0][3] = 9;
+f) nums[0][0] = nums[2][1]
+
+[color=green:8dd638c6bd]Resposta no final do capítulo !!![/color:8dd638c6bd]
+
+Não é sacanagem, os caras dão questões daí pra pior !!!
+
+Variáveis de Instância
+
+Declarada no escopo da classe, e tem um valor padrão conforme o seu tipo. (Mesmos valores atribuídos na inicialização de um array estudado anteriormente):
+
+public class Book {
+String title;
+public static void main(String[] args) {
+Book b = new Book(); // instanciando a classe
+System.out.println("O titulo é "+b.title);
+}
+}
+
+
+Resultado: O titulo é null ! String é um objeto e não um tipo primitivo!
+
+Para utilizar um variável primitiva, você SEMPRE terá que inicializá-la, caso contrário o compilador lhe tratará de forma inescrupulosa !
+
+
+public class TheBookonTheTable {
+public static void main(String[] args) {
+int i;
+System.out.println("o valor de i é "+i);
+}
+}
+
+
+O código acima gerará um conflito entre o programador e o compilador! Não tente ! É irreparável!!!
+
+Objeto Local
+
+Um Objeto locai (variável declarada dentro de um método) tem comportamento distinto de uma variável de instância. Quando um objeto é declarado como membro de uma classe, e uma instância dessa classe é criada, esse membro é inicializado com null (pois em Java null é um valor) e quando é declarado no escopo de um método, o objeto não é inicializado, portanto qualquer ousadia de uso, relações cortadas com o compilador!
+
+1. import java.util.*;
+2. public class Test {
+3. public static void main(String[] args) {
+4. Date data;
+5. Periodo p = new Periodo();
+6. if (data == null) System.out.print("inicio é nulo"); // erro de compilação
+7. if (p.inicio == null) System.out.print("inicio é nulo"); // ok - membro é nulo
+8. if (p.fim == null) System.out.print("fim é nulo"); // ok - membro é nulo
+9. }
+10.}
+11.class Periodo {
+12.Date inicio;
+13.Date fim;
+14.}
+
+
+O compilador mostrará um erro na linha 6, pois o objeto local data não foi inicializado !
+
+Método main
+
+Você já deve estar cansado de ver as declarações public static void main(String[] args), porém saiba que essa é a chave para a JVM executar uma aplicação em Java. Maiores detalhes sobre modificadores serão vistos no capítulo 2, mas algumas observações devem ser ressaltadas nesse capítulo. Observe:
+
+public static void main(String[] args) { ... } // válido - recomendado
+static public void main(String[] args) { ... } // válido
+public static void main(String[] a) { ... } // válido
+public static void main(String [] a) { ... } // válido
+public static void main(String a[]) { ... } // válido
+public static void main(String a []) { ... } // válido
+public static void main([]String args) { ... } // não é válido
+
+Mas o que é esse array de String que o método main recebe ?
+Esse array é usado para receber parâmetros da linha de comando, quando um programa Java está sendo executado.
+
+c:\>java Test Kuesley Fernandes
+
+Nesse caso, dois parâmetros estão sendo passados: Kuesley Fernandes
+
+Portanto com o seguinte código:
+
+public class Test {
+public static void main(String[] args) {
+System.out.println("Meu nome é: "+args[0]+args[1]);
+}
+}
+
+
+O Resultado seria: Meu nome é Kuesley Fernandes :o
+E se fosse executado: c:\>java Test Kuesley
+Qual seria o resultado ?? TESTE !!! :o

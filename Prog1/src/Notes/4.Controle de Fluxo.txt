@@ -1,0 +1,833 @@
+Capítulo 4 - Controle de fluxo, exceções e assertivas
+
+4.1 - Introdução
+
+O controle do fluxo é um elemento essencial em qualquer linguagem de programação.
+Mesmo com os paradigmas da programação orientada a objetos, controlar o fluxo de um algoritmo é uma necessidade imprescindível.
+Quem já desenvolveu software em linguagens estruturadas como clipper, cobol, c entre outras, sabe que se esse recurso não existisse,
+um algoritmo não poderia ser condicionado e testado para prever por exemplo, eventos inerentes a falhas em um recurso ou dispositivo do computador,
+ou até mesmo se um usuário entrou com um valor correto em um campo de entrada de dados.
+
+if
+
+Esse comando é um dos mais conhecido dentre as linguagens de programação, sua função é testar se uma condição é verdadeira, em sendo,
+executa o bloco seguinte à sua escrita, veja o exemplo:
+
+if ( 2 > 1) {
+....
+}
+
+Fácil isso ? Pode crer que no exame não cairá questões que abordem essa complexidade, ou melhor essa simplicidade.
+Veja agora o trecho a seguir :
+
+1. byte x = 10;
+2. if (x<0) {
+3.      if (x == 11) {
+4.          System.out.println("x é igual 11");
+5.      }
+6.      else if (x==x--) {
+7.          System.out.println("x é menor que 11");
+8.      }
+9.  }
+10. else
+11.     System.out.println("x não é menor que 0");
+
+
+O que resultará do seguinte código ? Complicou um pouquinho ??
+
+Se passasemos agora para o mundo compilatório (nem sei se isso existe), mas encarne o compilador agora.
+A primeira coisa que ele vai checar é se na linha 2 o x é menor que 0 ? - como é uma condição falsa, iremos para a linha 9 pois esse
+else é referente ao if (x<0) (pode contar as chaves) e exibirá a mensagem "x não é menor que 0" .
+Veja agora o trecho a seguir, apesar de muito parecido, existe um diferença do código anterior:
+
+1. byte x = 10;
+2. if (x<0)
+3.      if (x == 11) {
+4.          System.out.println("x é igual 11");
+5.      }
+6.      else if (x==x--) {
+7.              System.out.println("x é menor que 11");
+8.          }
+9.          else
+10.             System.out.println("x não é menor que 0");
+
+
+O que resultará esse código ? Se você respondeu NADA ! Está correto ! Vamos entender - como (x<0) é uma condição falsa
+e não existe else para esse if nenhum resultado será gerado - nesse caso o else da linha 9 ficou pertencente ao conjunto de
+condições iniciados pelo if da linha 3, tanto é que se as condições das linhas 3 e 6 não forem verdadeiras o else será executado como mostra o código a seguir:
+
+Com sua licença, uma observação, o if da linha 2 também foi alterado senão, não entrará na demais condições:
+
+1. byte x = 10;
+2. if (x>0)
+3.      if (x == 11) {
+4.          System.out.println("x é igual 11");
+5.      }
+6.      else if (x==--x) {
+7.              System.out.println("x é menor que 11");
+8.          }
+9.          else
+10.                 System.out.println("x não é menor que 0");
+
+
+Acho que isso já deve te alertar para as pegadinhas que os crápulas tentarão te colocar para saber o seu conhecimento
+quanto a sequencia do fluxo que um algoritmo deve obedecer, observe tambem que a identação ou récuo não foi colocada para confundir
+mais ainda sua cabeça e pode ter certeza que eles tem muito mais para lhe apresentar, por isso ESTUDE !
+
+if com atribuição
+
+Quando tem as chaves tudo fica mais fácil !
+
+1) O que o código acima resultará ?
+
+boolean b = false;
+if (b = true) {
+     System.out.println("b é verdadeiro")
+}
+else {
+    System.out.println("b é false")
+}
+
+
+a) Erro de compilação !
+b) Uma exceção será lançada
+c) b é false
+d) b é verdadeiro
+e) nenhum resultado
+
+Resposta no final do capítulo !!!
+
+Loko isso não ! O que acontece é que b sendo uma variável boolean o compilador entende que (b = true) é uma atribuição à variável b e depois faz a comparação,
+mas não tente fazer isso com qualquer outro tipo de variável, veja a seguir:
+
+byte x = 10;
+if (x = 7) { ... }	// erro de compilação
+else { ... }
+
+Agora, assim é permitido:
+
+byte x = 10;
+if (x == 7) { ... }	// ok
+else { ... }
+
+switch
+
+Esse comando também é muito utilizado para checagem de valores em uma variável,mas existem algumas particularidades que devem ser observadas, veja sua sintaxe:
+
+O switch só poderá ser aplicado a variáveis: int short byte char
+Portanto qualquer tentativa de utilizar em outras variaveis como: boolean, long, double, float ou um objeto resultará em erro de compilação !!!
+
+byte x = 3;
+    switch (x) {
+        case 1 :
+            System.out.println("x vale 1");
+        break;
+        case 2:
+            System.out.println("x vale 2");
+        break;
+        default:
+            System.out.println("x é maior que 2");
+        break;
+}
+
+
+O uso das chaves entres os cases é opcional pois não faz nenhuma diferença, veja o código:
+
+byte x = 3;
+    switch (x) {
+        case 1 : {
+            System.out.println("x vale 1");
+            break;
+        }
+        case 2:
+            System.out.println("x vale 2");
+            break;
+        default:
+            System.out.println("x é maior que 2");
+        break;
+    }
+
+
+O uso do break é necessário, se for omitido o fluxo seguirá normalmente para o outro case, como você pode ver no trecho a seguir:
+
+byte x = 2;
+switch (x) {
+    case 1 :
+        System.out.println("x vale 1");
+        System.out.println("x vale 1");
+        break;
+    case 2:
+        System.out.println("x vale 2");
+    default:
+        System.out.println("x é maior que 2");
+        System.out.println("x é maior que 2");
+    break;
+}
+
+
+O código a seguir resultará :
+
+x vale 2
+x é maior que 2
+x é maior que 2
+
+Pois entrará no segundo case e por não existir o break, também seguirá para o default !
+
+Provavelmente você se deparará com questões que abordam o uso do switch de forma inválida, como por exemplo:
+
+
+Não colocar a variável entre parenteses
+
+int x = 10;
+switch x {   // Erro de compilação: '(' expected
+    case 1:
+        ...
+        break;
+    case 2:
+        ...
+    break;
+}
+
+
+Uso de duas opções case iguais
+
+int x = 10;
+switch (x) {
+    case 1: { ... }
+    case 2: { ... }
+    case 1: { ... }    // Erro de compilação: duplicate case label
+}
+
+
+Uso de variável inválida
+
+long x = 100;
+switch (x) {   // Erro de compilação: possible loss of precision
+   case 1: { ... }
+   case 2: { ... }
+}
+
+
+Uso de objeto
+
+String x = new String("teste");
+switch (x) {   // Erro de compilação: incompatible types
+   case "aaa": { .... }
+}
+(Usando o novo JDK 7, é possivel fazer um switch de Strings)
+
+Uso de variável não final
+
+final int op1 = 1;
+final int op2 = 2;
+int op3 = 3;
+int opcao = 2;
+
+switch (opcao) {
+case op1: { ... }   // ok, op1 é final
+case op2: { ... }   // ok, op2 é final
+case op3: { ... }   // Erro de compilação: constant expression required
+default: { ... }
+}
+
+
+Bom acho que o switch é isso, mas vamos ratificar nossa linha de pensamento para ver se você entendeu tudo direitinho. Observe o trecho de código a seguir:
+
+int x = 1;
+switch (x) {
+    case 1: System.out.println("1");
+    default: System.out.println("default");
+    case 2: System.out.println("2");
+    case 3: System.out.println("3");
+    case 4: System.out.println("4");
+}
+
+
+O que resultará ?
+
+1
+default
+2
+3
+4
+
+Lembre-se sempre, uma vez que um case for verdadeiro, todos subsequentes serão se nenhuma palavra chave break for encontrada.
+Agora observe esse outro código:
+
+int x = 3;
+switch (x) {
+    case 1: System.out.println("1");
+    default: System.out.println("default");
+    case 2: System.out.println("2");
+    case 3: System.out.println("3");
+    case 4: System.out.println("4");
+}
+
+O que resultará ?
+
+3
+4
+
+Observe que como a condição default está antes da primeira condição verdadeira (case 3), ela não é executada.
+
+Extremamente importante saber
+
+2) O que esse código resultará ?
+
+public static void main(String[] args) {
+    final int x = 2;
+    for (int i = 0; i < 2; i++) {
+        switch (i) {
+        case x-1: System.out.print("1 ");
+        default: System.out.print("def ");
+        case x: System.out.print("2 "); break;
+        case x+1: System.out.print("3 ");
+        }
+    }
+}
+
+
+a) Não será compilado
+b) def 2 def 2 1
+c) def 2 1 def 2
+d) def 2 1 def 1
+e) def 1 2 def 1
+
+[color=green:b01166bcbb]Resposta no final do capítulo !!![/color:b01166bcbb]
+
+Agora observe o mesmo código alterando simplesmente a localização da palavra default
+
+public static void main(String[] args) {
+    final int x = 2;
+    for (int i = 0; i < 4; i++) {
+        switch (i) {
+            case x-1: System.out.print("1 ");
+            case x: System.out.print("2 "); break;
+            case x+1: System.out.print("3 ");
+            default: System.out.print("def ");
+        }
+    }
+}
+
+
+O resultado será: def 1 2 2 3 def
+
+Entendendo o primeiro código
+
+O mais interessante e que deve ser ressaltado é como o switch faz suas comparações, vamos tentar entender. Em nosso primeiro código sabemos que ocorrem duas iterações - isso todos concordam. O switch vai ao primeiro case - (case x-1), ou seja, se 0 (valor de i) é igual a 1, não é o caso, vai ao próximo que em nosso caso é um default, como é um default o swicth pergunta: "Existe algum case abaixo que atenda a minha necessidade (i=0) ???? - e uma voz do além "Não senhor, nenhum caso que atenda essa condição", bom nesse caso o switch executa o default exibindo a palavra def na tela e como não existe break, executa também o case x imprimindo o valor 2 onde encontra o break e para a execução do switch. Na segunda iteração o i vale 1 portanto na primera condição case x -1 é atendida imprimindo 1 na tela, em seguida def consecutivamente o número 2, onde a palavra break é encontrada encerrando o switch.
+
+Falando um pouco em loops
+
+while
+
+Quando você desejar executar um bloco uma quantidade desconhecida de vezes, esse é comando normalmente utilizado, veja sua sintaxe:
+
+int x = 10;
+while (x==10) {
+   System.out.println("entrou");
+   x++;
+}
+
+
+Resultado desse código:
+
+entrou
+
+Esse código será executado somente uma vez, visto que na segunda iteração o valor de x estará valendo 11, o que resultará em falso na condição do while, isso no dá uma dica de que uma iteração while pode não acontecer se a condição testada primeiramente for falsa, como você poderá ver o código a seguir:
+
+int x = 11;
+while (x==10) {
+   System.out.println("entrou");
+   x++;
+}
+
+
+Nenhum resultado será exibido.
+
+do-while
+
+Outro comando de iteração que pode ser usado é do-while, veja sua sintaxe:
+
+int x = 0;
+do {
+   System.out.println(""+x);
+   x++;
+} while (x < 1);
+
+
+Resultado:
+
+0
+
+Esse comando SEMPRE será executado pelo menor uma vez, pois a condição é verificada após a iteração.
+
+for
+
+O comando for é utilizado normalmente quando você sabe quantas vezes você precisa fazer as iterações. Apesar de que ele também pode ser usado exatamente como o while mas não é uma boa prática de programação.
+
+for ( int i = 0; i < 10; i++ ) {
+   System.out.print(""+i);
+}
+
+
+Resultado: 0123456789
+
+O comando for é composto por três expressões:
+
+a) declaração e inicialização
+b) expressão condicional
+c) expressão de iteração
+
+
+a) declaração e inicialização
+
+É executado uma única vez antes da primeira iteração, normalmente se usa para criar e inicializar um variável para controlar as iterações - você pode inicializar outras variáveis nessa parte como mostra o código a seguir:
+
+int s = 9;
+for ( int i = 0, s = 10; i < 10; i++ ) {
+   System.out.println(""+(s+i));
+}
+
+
+Observe que a variavel s foi redefinida com o valor 10 no bloco de inicialização (separado por vírgula). O escopo de uma variável criada nessa parte é somente dentro do escopo do comando for não tente usar uma variável como i em nosso exemplo anterior após o término do comando for que você magoará o compilador.
+
+for ( int i = 0; i < 10; i++ ) {
+   System.out.println(""+i);
+}
+System.out.println(" apos o for: "+i);   // erro de compilação: cannot resolve symbol
+
+
+b) expressão condicional
+
+Só pode haver UMA expressão condicional (não tente separar condições por vírgula que você terá um erro do compilador), será
+testada antes de cada iteração.
+
+for (int i = 0; i < 1; i++) {
+   System.out.println(""+i);
+}
+
+
+Nesse exemplo uma iteração será executado pois i vale 0 e antes de executar a primeira iteração a JVM testa se i < 1 ou seja se 0 é menor que 1, como é true, executa a iteração. Já na segunda iteração a "expressão de iteração" será executada incrementando 1 a variavel i portanto i valerá 1, o que tornará a condição falsa, por isso esse código resultará:
+
+0
+
+Você poderá ter uma condição composta como mostra o código a seguir:
+
+for (int i=0; i < 10 | (i%2) == 0; i++) {
+   System.out.println(""+i);
+}
+
+
+Mas lembre-se, quando essa condição for false o loop é encerrado, e não pense que vai para a próxima iteração, funciona como o while, mesmo que exista uma condição como o código anterior i < 10.
+
+c) expressão de iteração
+
+Essa expressão é executada sempre após a execução de uma iteração, ou seja, quando um bloco termina, a expressão de iteração é executada. Por isso o código a seguir é executado pelo menos uma vez:
+
+for (int i = 0; i < 1; i++) {
+   System.out.println(""+i);
+}
+
+
+Porque se a expressão ( i++ ) fosse executada antes da execução da primeira iteração, nenhum resultado seria mostrado na tela.
+
+break
+
+Essa palavra chave dentro de uma iteração seja ela (for, while, do) faz com que o fluxo será reportado para a primeira linha após o bloco de iteração como você pode ver no código a seguir:
+
+int x = 0;
+for (int i = 0; i < 10; i++ ) {
+    x = i;
+    if ( i > 3 ) break;
+}
+System.out.println("ultimo valor de i: "+x);
+
+
+Esse código resultará:
+
+ultimo valor de i: 4
+
+
+continue
+
+Interrompe a iteração atual indica para iniciar a próxima iteração. Para exemplificar vamos imaginar um algoritmo onde se deseja lista todos os números ímpares menores que 10:
+
+for (int i = 0; i < 10; i++ ) {
+    if ((i%2)==0) continue;
+    System.out.print(""+i);
+}
+
+
+O código acima resultará:
+
+13579
+
+Não vamos discutir se esse é o melhor algoritmo para esse problema mas é uma solução! Saiba que todas as linhas após o continue (que não é o nosso caso) não seria executada.
+
+Funciona exatamente igual para os comandos de iteração: ( do e while )
+
+Outras formas de se utilizar o comando for
+
+Você não é obrigado a definir nenhuma das três expressões, podendo usar o comando for da seguinte forma:
+
+for ( ; ; ) {
+...
+}
+
+
+Esse código comporta-se exatamente igual ao:
+
+while (true) {
+   ....
+}
+
+
+Saiba que palavra break deverá estar contida dentro de qualquer um desses blocos, caso contrário isso causará um loop infinito, talvez não seja infinido porque seu computador será desligado por orientação da ANAEL (lembra-se do APAGÃO) !
+
+3) Quantas iterações serão executadas com esse código ?
+
+for (int i=0; i < 10; ++i) {
+   System.out.println(""+i);
+   continue;
+}
+
+
+a) erro de compilação
+b) uma exceção será lançada
+c) 10
+d) 9
+e) loop infinito
+
+[color=green:b01166bcbb]Resposta no final do capítulo !!![/color:b01166bcbb]
+
+Explicação: A palavra-chave continue nesse código não faz nada de mais além do que o próprio comando já faria, visto que ele não está em nenhuma condição e também não existe nenhum código abaixo dele, portanto, é natural que mesmo sem ter o continue o comando já passaria para a próxima iteração.
+
+loops rotulados
+
+Apesar de ser um assunto crítico, os loops rotulados devem ser entendidos para a obtenção da sua certificação, mas não posso deixar de expressar minha opinião pessoa, é um recurso (se assim me permitem dizer) feio como prática de programação, lembram-se daquelas linguagens que usavam goto (como basic, etc.) ou arquivos de lote (.bat), pois então, não use essa prática - espero que nenhum programador basic ou de arquivos de lote do DOS leia isso. Veja como criar um loop rotulado:
+
+int x=0;
+for (int i=0; i < 4; i++) {
+    :foo
+    for (int j=0; j <= 4; j++ ) {
+        if (i == j) {
+        System.out.println(i+"x"+j);
+        break foo;
+        }
+    }
+}
+
+
+Esse código resultará:
+
+0x0
+1x1
+2x2
+3x3
+
+Não precisa falar muito sobre o que aconteceu com esse código, pois essa seria uma ação normal mesmo se não existisse o rótulo no loop interno ( for j ), mas se você precisar cancelar as iterações do for exterior ( for i ) ???
+
+Trabalhando com exceções
+
+Esse recurso é muito importante para a garantia de um código seguro, ou seja, trabalhar com exceções em uma linguagem é uma forma de tentar honrar seu programa contra erros que inconvenientemente aparecem se serem chamados.
+
+try {
+// primeira linha vigiada
+}
+catch (Exception e) {
+// primeira linha que será executada caso haja um exceção do tipo Exception
+}
+finally {
+// bloco que será executado, havendo ou não uma exceção (sempre!)
+}
+
+
+try
+
+O bloco try inicia uma região vigiada, ou seja, qualquer exceção que ocorrer nesse trecho modificará o fluxo do programa para um bloco catch (se houver) e/ou finally (se houver). Um bloco try deve obrigatoriamente ter ou um catch ou um finally, pode ter os dois, mas nunca um bloco try sozinho.
+
+Válido
+
+try {
+}
+catch (MyException e) {
+}
+
+Válido
+try {
+}
+finally {
+}
+
+Inválido
+
+try {
+}
+
+Erro: 'try' without 'catch' or 'finally'
+
+
+catch
+
+Bloco que define uma exceção e sua ação caso venha ocorrer. Você poderá ter mais de um catch em um bloco try.
+
+try {
+// algoritmo
+}
+catch (MyException e) {
+// solução caso ocorra
+}
+
+
+Nesse caso MyException é a exceção que pode acontecer, não que seja um desejo ardente do coração do programador, mas é uma cautela !
+
+finally
+
+Bloco que será executado após o try ou catch, ou seja, se um bloco try tiver um subbloco finally, este sempre será executado, independente se ocorrerem exceções ou não. Talvez você tenha se perguntado, "porque não coloque o código do bloco finally no try ou no catch ?" como mostra o pseudo-código a seguir:
+
+Vejamos um pseudo-codigo:
+
+try {
+1. Aloca memória para abertura de um arquivo
+2. Abre um arquivo
+3. Imprime arquivo na porta da impressora
+4. Fecha arquivo
+5. Desaloca memória
+}
+catch (ArquivoNaoExisteException e1) {
+1. Desaloca Memória
+2. Mostra mensagem que arquivo não foi encontrado
+}
+catch (PortadaImpressoraNaoResponde e2) {
+1. Desaloca Memória
+2. Fecha Arquivo
+}
+
+
+Observe que o código de desalocar memória está redundante (tá!! sei que poderia alocar somente se abrisse o arquivo, mas não vamos complicar)
+
+Veja o pseudo-código:
+
+try {
+1. Aloca memória para abertura de um arquivo
+2. Abre o arquivo
+3. Imprime arquivo na porta da impressora
+4. Fecha arquivo
+5. Desaloca memória
+}
+catch (ArquivoNaoExisteException e1) {
+1. Mostra mensagem que arquivo não foi encontrado
+
+}
+catch (PortadaImpressoraNaoResponde e2) {
+2. Fecha Arquivo
+}
+finally {
+1. Desaloca memória
+}
+
+
+
+Hierarquia de classes de exceção:
+
+
+
+Pode parecer estranho, mas existe uma diferença singular entre Erro e Exceção. Por mais que você tenha achado esquisito essa colocação, saiba que um erro é algo que não tem "remédio" e exceção é um evento que deveria acontecer normalmente mas por algum motivo de força maior não conseguiu se completar.
+
+Erro
+Falta de memória do computador
+
+
+Exceção
+Tentar consultar um coluna em um banco de dados que não exista
+Tentar abrir um arquivo que foi apagado
+Tentar trocar informações com um outro computador que por algum motivo for desligado
+
+Isso nos leva a seguinte conclusão:
+
+
+Todas as subclasses de Exception (com exceção as subclasses RuntimeException) são exceções e devem ser tratadas !!!
+Todos os erros provenientes da classe Error ou RuntinmeException são erros e não precisam serem tratados !!!
+
+
+Você deve estar se perguntando, "pô! mas tudo não são erros ?" ! São, mas somentes as exceções precisam ser tratadas ! Vamos ver alguns código a seguir que o ajudará a entender esses conceitos.
+
+1. public class Erros {
+2.   public static void main(String[] args) {
+3.      metodoDoMal();
+4.    }
+5.   public static void metodoDoMal() {
+6.      throw new IOException("eu fiz um erro");
+7.    }
+8. }
+
+
+Esse código lança uma exceção dentro do metodoDoMal(). Normalmente você não precisará lançar exceções pois Murphy se encarregará de fazer isso pra você, porém imagine uma situação em que você precise gerar um exceção. Apesar da sintaxe está correta na geração da exceção, esse código não será compilado. Quem está tratando a exceção IOException que foi gerada no método metodoDoMal() ?? Se uma exceção ocorrer ela deve ser tratada (se não for Erro ou RuntimeException é claro), e existem duas maneiras de se fazer isso:
+
+1 - Usando um bloco try/catch
+
+O código poderia ser remediado da seguinte forma:
+
+1. public class Erros {
+2.   public static void main(String[] args) {
+3.      metodoDoMal();
+4.    }
+5.   public static void metodoDoMal() {
+6.      try {
+7.         throw new IOException("eu fiz um erro");
+8.      }
+9.      catch (IOException e) {
+10.         // código que solucionará o problema
+11.      }
+12.    }
+13. }
+
+
+2 - Usando a propagação de exceção através de métodos
+
+1. public class Erros {
+2.   public static void main(String[] args) {
+3.      metodoDoMal();
+4.    }
+5.   public static void metodoDoMal() throws IOException {
+6.      throw new IOException("eu fiz um erro");
+7.    }
+8. }
+
+
+Esse código também não será compilado, pois o compilador é esperto e sabe que uma exceção pode ocorrer em metodoDoMal (pois foi declarado em throws IOException) e está sendo propagado para o método mais que não está tratando, pois nenhum bloco try existe no método chamado. Talvez isso tenha complicado um pouco mais olhe o código a seguir:
+
+import java.io.*;
+import java.awt.print.*;
+
+public class Teste {
+    public static void main(String[] args) {
+        try {
+        metodoDoMal();
+        }
+        catch (IOException e) {
+        }
+        catch (PrinterException p) {
+        }
+    }
+    static void metodoDoMal() throws IOException, PrinterException  {
+        metodoPiorAinda();
+    }
+
+    static void metodoPiorAinda() throws PrinterException {
+    }
+}
+
+
+Isso é o que chamamos de pilha de método, mas acalme-se é fácil. O método main() chama o método metododoMal() que por sua vez chama o métodoPiorAinda(), criando um pilha de métodos
+
+Pilha:
+
+MetodoPiorAinda() throws PrinterException
+
+metodoDoMal() throws IOException, PrinterException
+
+main(String[] args)
+
+Observe que o método MetodoPiorAinda() declara a exceção PrinterException, isso que dizer que essa exceção poderá ocorrer dentro desse método. Como essa exceção não está sendo tratada em nenhum bloco try/catch, ela deverá propagada para o método superior na pilha "metodoDoMal()", Se nesse método não houver um tratamento com try/catch ou propagação através de throws na cabeça do método, haverá um erro de compilação (pode testar, tire a declaração PrinterException de metodoDoMal() que esse código não será compilado). Quando o metodoDoMal() for encerrado, seguindo a ordem da pilha o fluxo será retornando para o método main, se esse método não tratar as exceções declaradas em metodoDoMal(), o código também não será compilado (tente tirar qualquer um dos blocos catch´s que o código será extinguido do planeta).
+
+Você terá que saber a diferente entre um exceção declarada e não-declarada. Lembre-se sempre que os erros (subclasses de Error e RuntimeException) não precisam ser tratadas como mostra o código a seguir:
+
+public class Teste {
+    public static void main(String[] args) {
+        metodoDoMal();
+    }
+    static void metodoDoMal() throws Error  {
+    }
+}
+
+
+Observe que o método metodoDoMal declara/propaga uma exceção (erro) e o método chamado (main) não trata e nem propaga.
+
+Assertivas
+
+O uso de assertivas é um recurso adicionado somente na versão 1.4 que permite ao programador testar a consistência de seu código. Você deverá sempre usar assertiva quando quiser testar se uma variável está em um dado momento com um valor apropriado, se não gerar um AssertionError, isso em tempo de desenvolvimento, embora quando o programa for distribuído e entregue ao cliente, nenhuma anormalidade ocorrerá visto que as assertivas nunca são ativadas por padrão. Considere o pensamente de que as assertivas foram incrementadas para auxiliar ao programador gerar código mais robustos, mas nunca poderão alterar o comportamento do programa.
+
+private int foo(int i) {
+    assert (i>0);
+    return i * i;
+}
+
+
+Observe que o código anterior nada mais faz do que testar se o valor de i passado como parâmetro é maior que 0 se for o programa não faz nada, agora se o valor de i não for maior que 0, então um AssertionError será lançada - com isso o programador poderá saber que em algum lugar algum engraçadinho está passando um valor incorreto para o método foo. Mas nenhuma consequencia isso teria se o código fosse entregue, visto que nenhum resultado seria afetado no cliente.
+Existem duas maneiras de se usar assertivas:
+
+muito simples
+
+assert ( i < 0 );
+
+
+simples
+
+assert ( i > 0 ) : "Valor do i é "+i;
+
+A segunda forma, incrementa o valor após os dois pontos na mensagem de erro de AssertionError, com isso você poderá depurar seu código com mais detalhes.
+Você precisará saber a diferença entre usar uma assertiva de forma válida e de forma apropriada ou correta, visto que, válida está relacionada com o código ser compilado, mas nem sempre é a maneira como deve ser.
+
+
+Assertivas - uso incorreto/inapropriado
+
+1) Nunca manipula um AssertionError
+
+Não use um catch e manipula um erro de assertiva
+
+2) Não use assertiva para validar argumentos em métodos públicos
+
+Você não pode garantir nada em métodos público, portanto usar assertiva nesse caso, não é uma boa prática
+
+3) Não use assertiva para validar argumento da linha de comando
+
+Isso é uma particularidade de um método público, mas segue a mesma regra
+
+4) Não use assertivas que possam causar efeitos colaterais
+
+Você não pode garantia que as assertivas sempre serão executadas, portanto o seu programa deve executar independentemente das assertivas, e nunca de forma diferente simplesmente porque as assertivas foram ativadas.
+
+
+Uso Apropriado/Correto
+
+1) Use assertiva para validar argumentos em métodos privados
+
+Como a visibilidade é privada, você consegue detectar se alguém (você) tá fazendo caca.
+
+2) Use assertiva sem condição em um bloco que pressuma que nunca seja alcançado.
+
+Se você tem um bloco que nunca seria alcançado, você pode usar uma assert false, pois assim saberia se em algum momento esse bloco está sendo alcançado.
+
+3) Lançar um AssertionError explicitamente
+
+4) Se um bloco switch não tiver uma instrução default, adicionar uma assertiva é considerado uma boa prática
+
+
+Considerações finais:
+
+- Mesmo que um código tenha sido compilado com o uso de assertivas, quando executar, vc deverá explicitamente forçar a utilização, pois por padrão as assertivas não são ativadas;
+
+- Assertivas não são compiladas nem executadas por padrão;
+
+- É possível instruir a JVM desativar assertivas para uma classe e ativar para um dado pacote em uma mesma linha de comando;
+
+- flags:
+
+java -ea	 java -enableassertion	 // habilita assertion
+java -da	 java -disableassertion	 // desabilita assertion
+java -ea:br.com.Atimo	 // habilita para o pacoto br.com.Atimo
+java -ea -das	 // habilita assertion em âmbito geral e desabilita nas classes do systema
+java -esa	 // habilita nas classes do sistema
+
+
+Bom acho que chagamos ao final de mais um capítulo !
+
+Respostas dos exercícios propostos:
+
+1) d
+
+2) c
+
+3) c
+

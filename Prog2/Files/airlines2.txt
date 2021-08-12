@@ -1,0 +1,41 @@
+14
+Ocean Air
+Delta
+United
+Quantas
+Avolar
+AlohaAir
+Aria
+Lufthansa
+EVA Air
+BMI
+Northwest
+Maxair
+Southwest
+Girjet
+
+4 2 3 4 5
+1 1
+4 8 1 4 7
+3 3 1 6
+2 10 1
+1 4
+2 3 8
+3 3 7 9
+1 8
+2 11 5
+1 10
+2 13 14
+1 12
+1 12
+
+9
+1 9
+3 12
+9 2
+3 6
+7 10
+2 6
+4 5
+8 11
+13 1

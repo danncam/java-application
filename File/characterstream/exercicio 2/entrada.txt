@@ -1,0 +1,7 @@
+Um arquivo de texto é uma espécie de ficheiro informático que é estruturado como
+uma seqüência de linhas. Um arquivo de texto existe dentro de um computador do
+sistema de arquivos. O fim de um arquivo de texto é frequentemente denotado por
+colocar um ou mais caracteres especiais, conhecidos como um marcador
+fim-de-arquivo, após a última linha em um arquivo de texto.
+
+Fonte: Wikipedia

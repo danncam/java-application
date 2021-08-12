@@ -1,0 +1,764 @@
+Capítulo 8 - Classes internas
+
+8.1 - Onde deve ser usada e para que serve ?
+
+Antes de qualquer introdução à esse assunto, vamos fazer uma explanação sobre as classes internas, onde e quando devem ser usadas, visto que esse assunto é um tanto contundente no que se refere a reutilização de código, extensabilidade e escalabilidade de um código sob o ótica da OO.
+
+8.1.1 - Um exemplo oficial
+
+Definir uma classe interna ou aninhada é um recurso interessante adicionado na versão 1.1 da Java, porém deve ser bem cauteloso o seu uso visto que se assim não o for, com certeza teremos redundância de código, classes extremamente complicadas de ser entendidas e com seu uso limitado, portanto saiba decidir seu uso. Vejamos um exemplo usado na própria framework de coleção Java, as classes Map herdam de uma superclasse chamada AbstractList, para seu funcionamento ela usa um objeto de uma classe interna chamado Entry e seu escopo está limitado à classe AbstractList, com um funcionamento totalmente peculiar à AbstractList, não teria muito sentido, criar uma classe externa para Entry, visto que sua utilização se limita à AbstractList. Definir classes especilialista é um conhecimento extremamente necessário no tocante à orientação a objeto e nesse caso a classe Entry nada mais é do que um membro (pois é assim que também pode ser chamadas as classes internas) de AbstractList.
+
+8.2 - As classes internas são divididas em:
+
+- Classe estática aninhada (top-level class)
+- Classe interna comum
+- Classe interna local de método
+- Classe interna anônima
+
+
+8.3 - Classes estáticas
+
+Entenderemos agora o que são as classes estáticas que também podem ser chamadas como classe de nível superior ou top-level class, entretanto no fritar dos ovos é tudo a mesma coisa.
+Uma classe estática não tem acesso aos membros da instância da classe encapsulada, somente os membros estáticos, tem a mesma visibilidade de uma classe externa.
+
+Modificadores que podem ser atribuídos à uma classe interna estática:
+
+static - obrigatório é claro
+protected
+public
+private
+abstract
+final
+
+* nunca abstract e final simultâneamente é claro!
+
+public class Ex03 {
+   static int CountStatic = 0;
+   int CountNonStatic = 0;
+
+   public static class Inner {
+   }
+}
+
+
+Você NUNCA podería referencia o membro CountNonStatic dentro da classe Inner, uma vez que esse membro não é estático. Isso geraria um erro de compilação como podemos observar a seguir:
+
+public class Ex03 {
+   static int CountStatic = 0;
+   int CountNonStatic = 0;
+
+   public static class Inner {
+      public void doInner() {
+         System.out.println( CountNonStatic );
+      }
+   }
+}
+
+
+O erro acima é básico pra quem já está no capítulo 8 desse guia, mas vou mostrar o erro que o compilador gera:
+
+[color=red:e4cc865dea]Erro de compilação: non-static variable CountNonStatic cannot be referenced from a static context.[/color:e4cc865dea]
+
+Agora analisaremos o código a seguir:
+
+public class Outer {
+   static private int CountStatic = 0;
+   int CountNonStatic = 0;
+
+   public static class Inner {
+      public void doInner() {
+         System.out.println( CountStatic );
+      }
+   }
+}
+
+
+Já o código acima compila sem nenhum problema, visto que CountStatic é um membro estático da classe e pode ser acessado sem que haja uma instância de Outer.
+Você deve estar se perguntando: "Oxente, mas porquê então criar uma classe estática (top-level class) se ela se comporta da mesma forma que uma classe externa ?" - Essa questão é natural na cabeça de qualquer um. A resposta nem sempre, vejamos um explicação lógica para tal.
+
+O que nós aprendemos no capítulo 2 sobre o modificador private ? Que um membro com modificador private só pode ser acesso de dentro da própria classe certo ? Mentira era tudo mentira ! Calma é só uma brincadeira. Note que no código anterior o membro CountStatic tem o modificador private, e mesmo assim está sendo acessado de uma classe que se comporta como classe externa porém não deixa de ser interna.
+O que uma classe de nível superior têm de diferentes das classes externas no tocante à relacionamento com sua classe encapsulada é um acesso direto aos membros independentes de sua modificador de acesso. A seguir temos um exemplo prático do us desse tipo de classe:
+
+import java.util.*;
+public class Week {
+   private int weeknr;
+   private int year;
+   public Week(int weeknr, int year) {
+      this.weeknr = weeknr;
+      this.year = year;
+   }
+   public Iterator getDays() {
+      return new DayIterator(this);
+   }
+   public int getWeeknr() {
+      return weeknr;
+   }
+   public int getYear() {
+      return year;
+   }
+   public static class DayIterator implements Iterator {
+      private int index = 0;
+      private Calendar cal = null;
+
+      DayIterator (Week aWeek) {
+         cal = new GregorianCalendar();
+         cal.clear();
+         cal.set(Calendar.YEAR, aWeek.getYear());
+         cal.set(Calendar.WEEK_OF_YEAR, aWeek.getWeeknr());
+      }
+      public boolean hasNext() {
+         return index < 7;
+      }
+      public Object next() {
+         cal.set(Calendar.DAY_OF_WEEK, index++);
+         return cal.getTime();
+      }
+      public void remove() {
+         // not implemented
+      }
+   }
+
+   public static void main(String[] args) {
+   // list the days of the week
+   if (args.length < 2) {
+      System.err.println("Usage: java Week <weeknr> year>");
+      System.exit(1);
+   } else {
+      try {
+        int weeknr = Integer.parseInt(args[0]);
+        int year = Integer.parseInt(args[1]);
+        Week wk = new Week(weeknr, year);
+        for (Iterator i=wk.getDays();i.hasNext();) {
+          System.err.println(i.next());
+        }
+      } catch (NumberFormatException x) {
+        System.err.println("Illegal week or year");
+      }
+   }
+   }
+}
+
+
+Entender o código acima o fará abrir os horizontes para o uso de classes estáticas.
+
+8.4 - Classe interna comum
+
+O estudo de classes internas não segue uma orientação explícita da Sun, porém é comum se deparar com questões ao longo do exame, e você precisará saber algumas regras para não vacilar (errar mesmo) alguma questão pertinentes à esse assunto.
+Você NUNCA poderá ter uma instância de uma classe interna sem que haja uma instância de uma classe externa, Vejamos:
+
+public class Outer {
+   class Inner {
+}
+}
+
+
+Fixe bem isso: "Qualquer tentativa de instanciação da classe Inner sem que haja um OBJETO do tipo Outer, não funciona e entenderemos isso no que segue".
+Podemos inferir a partir dessa asserção que um método estático de Outer nunca poderá instanciar uma classe Inner, visto que um método estático pode ser acesso sem um objeto propriamente dito e isso viola a regra definida anteriormente. Portanto:
+
+public class Outer {
+   public static void main(String[] args) {
+      Inner i = new Inner();
+}
+
+   class Inner {
+}
+}
+
+
+O código anterior causa erro de compilação, visto que o método main é estático e pode ser chamado sem que haja uma instância de Outer, portanto erro: "Uma instãncia de Inner só poderá existir a partir sua classe externa" - mudando um pouco o código obteríamos um êxito na compilação:
+
+public class Outer {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      Inner i = o.new Inner();
+}
+
+   class Inner {
+}
+}
+
+
+Compilação executado sem nenhum erro !
+
+8.4.1 - Classes internas e membros externos
+
+Uma classe interna como já foi falado, pode ser chamada de membro de classe da classe externa, portanto se é um membro, ter visibilidade para qualquer membro da classe externa, isso mesmo, qualquer membro da classe externa pode ser acesso pela classe interna, vejamos:
+
+public class Outer {
+    private int x = 0;
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      Inner i = o.new Inner();
+      o.print();
+   }
+   public void print() {
+       System.out.println("x before "+x);
+       Inner i = new Inner();
+       i.print();
+   }
+   class Inner {
+       public void print() {
+      x++;
+      System.out.println("x after: "+x);
+       }
+   }
+}
+
+
+Note que o membro x que é privado foi acesso por Inner sem nenhum erro. O código acima resulta em:
+
+x before 0
+x after: 1
+
+8.4.2 - Instanciando um objeto interno fora da classe externa
+
+Por mais que isso possa parecer estranho, mas é possível obter uma instância de uma classe interna fora de sua classe externa, vejamos o código que segue:
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      Outer.Inner i = o.new Inner();
+   }
+}
+class Outer {
+    class Inner { }
+}
+
+
+O código acima compila e é válido, pois para se obter uma instância Inner se informa sua classe externa - Outer.
+Isso é muito interessante pode ser usado tambem para deixar o acoplamento de classes em um nível baixo - mas tome muito cuidado com isso!
+
+8.4.3 - Referenciando a classe externa de dentro da classe interna
+
+Ter uma referência da classe externa de dentro da classe interna pode parecer estranho, porém, às vezes, é necessário. Imaginemos uma situação em que um método da classe interna precise passar como referência a classe externa, viu ? Por mais que a classe interna tem acesso à todos os membros da classe externa, pode ser que em um caso atípico, você precise disso, ou acha que estamos colocando isso aqui por ser notório ?
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      Outer.Inner i = o.new Inner();
+      i.see();
+   }
+}
+class Outer {
+    private int x = 10;
+    class Inner {
+   public void see() {
+       System.out.println(x);
+       System.out.println(this);      // nota 1
+       System.out.println(Outer.this);   // nota 2
+   }
+    }
+}
+
+
+Nota 1: Observe que a palavra chave this foi usada, nesse caso ele é uma referência ao objeto de Inner !
+Nota 2: Note que this foi usado com o nome da classe externa, portanto, esse é o objeto da classe externa
+
+8.4.4 - Modificadores aplicados as classes internas comuns
+
+Como já foi falado mais tenho certeza que sua displicência o fez esqueçer :) - calma, calma é só um teste de paciência ! - uma classe interna é um membro da classe externa, portando os modificadores a seguir podem ser aplicados à uma classe interna, seguindo as mesmas regras do capítulo 2:
+
+final
+
+abstract
+
+public
+
+private
+
+protected
+
+static - com uma exceção que estudaremos mais adiante.
+
+strictfp
+
+
+8.5 - Classe interna local de método
+
+Até agora vimos como uma classe pode ser criada dentro de outra, com escopo em toda a classe, pois bem, agora vamos reduzir esse escopo, isso mesmo, definir uma classe com escopo de método, vejamos:
+
+public class Outer {
+   public void see() {
+      class Inner { }
+}
+}
+
+
+Note que a classe Inner foi criada dentro do método see(), apesar de não fazer nada pois nenhuma instância foi criada de Inner dentro do método see.
+
+8.5.1 - Modificador padrão
+
+Uma classe de método tem o modificador private por padrão, visto que não pode ser instancia de nenhum outro local senão o método que encapsula a classe, vejamos um exemplo de uso:
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      o.see();
+   }
+}
+class Outer {
+    private int x = 10;
+    public void see() {
+   System.out.println("before "+x);
+   class Inner {
+       public Inner() {
+      x = 0;
+       }
+   }
+   System.out.println("after "+x);
+    }
+}
+
+
+Note que a classe Inner foi criada no meio do método, e isso é perfeitamente aceitável pelo compilador, só não tente instanciá-la antes de criar, pois isso seria um insulto ao compilador. O código acima resulta em:
+
+before 10
+after 10
+
+A variável x não foi inicializada com 0 pois o construtor de Inner não foi chamado, vejamos o exemplo a seguir:
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      o.see();
+   }
+}
+class Outer {
+    private int x = 10;
+    public void see() {
+   System.out.println("before "+x);
+   class Inner {
+       public Inner() {
+      x = 0;
+       }
+   }
+   Inner i = new Inner();
+   System.out.println("after "+x);
+    }
+}
+
+
+Resultado:
+
+before 10
+after 0
+
+Não existe forma no mundo Java para instanciar uma classe interna de método fora do próprio método, se conhecerem não esqueçam de me avisar. Tentei mostrar um exemplo de instanciação inválida mas não fui criativo o suficiente, vejamos algo:
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      o.see();
+   }
+}
+
+class Outer {
+    private int x = 10;
+    Inner x;      // ERRO A CLASSE INNER NAO FOI DECLARADA
+    public void see() {
+   System.out.println("before "+x);
+   class Inner {
+       public Inner() {
+      x = 0;
+       }
+   }
+   Inner i = new Inner();
+   System.out.println("after "+x);
+    }
+}
+
+
+ou
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      System.out.println(o.see().new Inner().s);   // SERIA O CÚMULO
+   }
+}
+
+class Outer {
+    private int x = 10;
+    public void see() {
+   System.out.println("before "+x);
+   class Inner {
+       public String s = "string inner";
+       public Inner() {
+      x = 0;
+       }
+   }
+   Inner i = new Inner();
+   System.out.println("after "+x);
+    }
+}
+
+
+8.5.2.1 - Modificadores aplicados à classe interna de método
+
+Os únicos modificadores aplicados a essa classe são:
+
+abstract
+final
+
+Nunca os dois ao mesmo tempo é claro! Pesquisamos muito para saber qual seria o sentido de criar uma classe de método abstrata. Se alguém descobrir esse enigma não esqueça de me avisar...
+
+PODE ESPERAR QUE NA PROVA PODE CAIR ALGO ASSIM, MAS NÃO VACILEM !!
+
+8.5.2 - Usando as variáveis automática de métodos
+
+Uma classe interna de método não pode referenciar as variáveis locais de método, por incrível que pareça ! Você deve estar desgrenhando-se, mas não pode ! E existe uma explicação plausível para isso. Imagina que uma classe interna de método chame um método e precise passar como parâmetro a própria classe, como um método da classe interna pode referenciar uma variável automática após a execução do método, uma vez que esse sendo finalizado, suas variáveis são destruídas. Você pode estar se perguntando: "Oxente, mas como a classe interna precisará de uma variável local após a execução do método ?" Calma, imagine que o objeto da classe interna, que está no heap foi passado para um outro método, e esse tem sua execução mesmo após o método ter sido finalizado. Vejamos um exemplo inválido:
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      o.see();
+   }
+}
+
+class Outer {
+    private int x = 10;
+    public void see() {
+   int y = 5;
+   System.out.println("before "+x);
+   class Inner {
+       public String s = "string inner";
+       public Inner() {
+      x = y;   // nota 1
+       }
+   }
+   Inner i = new Inner();
+   System.out.println("after "+x);
+    }
+}
+
+
+Nota 1: Note que a variável local y não pode ser referenciada dentro da classe interna de método, isso causaria um erro de compilação: local variable y is accessed from within inner class; needs to be declared final
+
+Mas para aumentar a complexidade e o número de regras da linguagem Java, existe uma exceção para esse caso: Se a variável for final poderá ser referenciada (sei que você já tinha traduzido a mensagem de erro acima!), vejamos
+
+public class TestOuter {
+   public static void main(String[] args) {
+      Outer o = new Outer();
+      o.see();
+   }
+}
+
+class Outer {
+    private int x = 10;
+    public void see() {
+   final int y = 5;
+   System.out.println("before "+x);
+   class Inner {
+       public String s = "string inner";
+       public Inner() {
+      x = y;
+       }
+   }
+   Inner i = new Inner();
+   System.out.println("after "+x);
+    }
+}
+
+
+Resultado:
+
+before 10
+after 5
+
+8.5.3 - Modificadores de acesso
+
+As mesmas regras de variáveis locais se aplicam as classes internas de métodos. Com isso podemos lembrar facilmente quais são os únicos modificadores aplicáveis às variáveis locais ?
+
+a) public, private, protected, padrão
+b) final, abstract, static
+c) static, final, protected
+d) abstract, final
+e) todos os modificadores
+
+[color=green:e4cc865dea]Resposta no final do capítulo !!![/color:e4cc865dea]
+
+8.6 - Classes internas anônimas
+
+Preste bastante atenção nesse tópico, pois você pode se confundir quando se deparar com questões que envolvem classes anônimas. Vejamos sua sintaxe:
+
+class Car {
+   public void run() { ... }
+}
+
+class Gol {
+
+Car car = new Car() {
+   public void break() { ... }
+};
+}
+
+
+Observe que a classe Car foi criada sem nenhuma anormalidade, porém a classe Vehicle foi criada com uma instância de Car, e se você for uma camarada esperto, notou que não houve um (;) (ponto-e-vírgula) após a declaração do membro car, ao contrário, foi criada uma instância de uma classe anônima (pois não foi definido um nome - que é uma subclasse de Car) com um novo método chamado break. A priori, pode parecer complicado, mas isso tudo nadamais é do que, uma herança em local exclusivo (ou pra complicar mesmo), ou seja, somente nesse ponto preciso de redefinir a classe X. Vejamos um outro exemplo para entender melhor:
+
+class Empregado {
+   public void trabalhar() {
+       System.out.println("trabalhar");
+   }
+}
+
+class QuadroFuncionario {
+   Empregado mgr  = new Empregado() {
+      public void trabalhar() {
+         System.out.println("mandar");
+      }
+   };
+
+   Empregado peao = new Empregado() {
+      public void trabalhar() {
+         System.out.println("executar");
+      }
+   };
+}
+
+
+Note que estamos realizando uma criação de métodos polimórficos para os objetos peao e mgr onde ambos estendem de Empregado.
+
+Você é capaz de descobrir qual o erro da seguinte listagem ?
+
+class Empregado {
+   public void trabalhar() {
+       System.out.println("trabalhar");
+   }
+}
+
+class QuadroFuncionario {
+   Empregado mgr  = new Empregado() {
+      public void trabalhar() {
+         System.out.println("mandar");
+      }
+
+      public void demite() {
+             System.out.println("demite");
+      }
+   };
+
+   public void work() {
+       mgr.trabalhar();
+       mgr.demite();
+   }
+}
+
+
+Observe que mgr é uma instância de Empregado, o qual define o métodos trabalhar, porém há uma tentativa de execução do método (que realmente foi definido na classe anônima) mgr.demite(), que o compilador acusa erro de ignorância, ou seja, o compilador só irá conhecer os métodos definidos na classe pai - qualquer tentativa de execução ou chamada de um método não existente, causará um erro de compilação: cannot resolve symbol
+
+Não podemos esquecer...
+
+public class Test {
+   static public void enclosingMethod(final String arg1, int arg2) {
+      final String local = "A local final variable";
+      String nonfinal = "A local non-final variable";
+      Object obj = new Object() {
+         public String toString() {
+            return local + "," + arg1;
+         }
+         };
+
+      System.out.println(obj.toString());
+   }
+
+   public static void main(String[] args) {
+      enclosingMethod("fim", 0);
+   }
+}
+
+
+Esse código é perfeitamente compilado pois a classe anônima que está sendo criada dentro do método enclosingMethod referencia a variável local que é definida como final e arg1 que também é um argumento com modificador final. Qualquer tentativa de referencia arg2 ou nonfinal dentro do método acima, causará erro de compilação, se estiver duvidando por tentar.
+
+Se você realmente precisar de referenciar uma variável local dentro de uma classe anônima podemos dar uma dica, provavelmente você nunca precisará mas, só pra não perder a viagem: use array. Vejamos um exemplo:
+
+public class Ex02 {
+   public static void main(String[] args) {
+      final int[] age = new int[1];
+      System.out.println("Before: "+age[0]);
+      Pessoa p = new Pessoa() {
+         public void getAge() {
+            age[0] = 25;
+         }
+      };
+      p.getAge();
+      System.out.println("After: "+age[0]);
+   }
+}
+abstract class Pessoa {
+   abstract void getAge();
+}
+
+
+Se você está lembrado do que estudamos nos capítulos iniciais, vai lembrar que o array é final seus elementos não. Portanto o resultado desse código será:
+
+Before: 0
+After: 25
+
+
+8.6.2 - Implementando uma interface anonimamente
+
+Você também poderá se deparar com o código a seguir:
+
+public class Ex04 {
+   public static void main(String[] args) {
+      acao( new Evento() {
+         public void clicar() {
+            System.out.println("clicou");
+         }
+         public void arrastar() {
+            System.out.println("arrastou");
+         }
+      });
+   }
+   public static void acao(Evento e) {
+      e.clicar();
+      e.arrastar();
+   }
+}
+interface Evento {
+   public abstract void clicar();
+   public abstract void arrastar();
+}
+
+
+Você deve estar se peguntando, como pode passar para um método uma instância de uma interface ? Por mais que possa parecer isso, não é o que está acontecendo, na verdade estamos criando uma classe anônima que implementa a interface Evento, tanto é que a nova classe teve que implementar todos os métodos de Eventos (clicar e arrastar), se um desses dois métodos não forem implementados na classe anônima um erro de compilação seria exibido. Pode parecer estranho, mas não é ! O que criamos aqui foi um implementador de classe como algumas literaturas assim o definem.
+
+Mesmo que esse assunto de classes anônimas possa parecer diferentes as regras de herança, polimorfismo se aplicam, ou seja, uma tentativa de criar uma classe anônima que herda de uma classe abstrata deve obrigatóriamente implementar todos os seus métodos, isso porque você não pode definir uma classe anônima abstrata.
+
+public class Ex04 {
+   public static void main(String[] args) {
+      acao( new Evento() {
+         public void clicar() {
+            System.out.println("clicou");
+         }
+         public void arrastar() {
+            System.out.println("arrastou");
+         }
+      });
+   }
+   public static void acao(Evento e) {
+      e.clicar();
+      e.arrastar();
+   }
+}
+interface Evento {
+   public abstract void clicar();
+   public abstract void arrastar();
+}
+
+
+Vamos mudar um pouco o código acima:
+
+public class Ex05 {
+   public static void main(String[] args) {
+      acao( new Evento() {
+         public void clicar() {
+            System.out.println("clicou");
+         }
+      });
+   }
+   public static void acao(Evento e) {
+      e.clicar();
+      e.arrastar();
+   }
+}
+abstract class Evento {
+   public abstract void clicar();
+   public abstract void arrastar();
+}
+
+
+O código acima gerará um erro de compilação, pois o método arrastar não foi implementado na nova classe (isso seria perfeitamente possível se a nova classe fosse abstrata) porém como é uma classe concreta deve implementá-lo.
+
+8.6.3 - Classes finais não podem ser anônimas
+
+O título anterior já falou tudo o que precisava ser falado, mas vamos ser menos suscinto. Aprendemos algum dia de nossa vida que uma classe marcada com o modificador final nunca poderia ser estendida, consequentemente nunca poderíamos ter uma classe anônimas a partir de uma classe final, pois uma classe anônima nada mais é do que uma herança de uma outra classe onde a subclasse não tem nome. Vejamos isso na prática:
+
+public class Ex06 {
+   public static void main(String[] args) {
+      acao( new Boy() {
+         public String get() {
+            System.out.println("boy anonymous");
+         }
+      });
+   }
+   public static void acao(Boy e) {
+      System.out.println(e.get());
+   }
+}
+final class Boy {
+   public String get() {
+      return "boy";
+   }
+}
+
+
+O código acima gerará o seguinte erro de compilação:
+
+[color=red:e4cc865dea]Erro de compilação: cannot inherit from final Boy[/color:e4cc865dea]
+
+Bom não podemos esquecer das demais regras envolvendo classes e herança, como a visibilidade para com classes de outros pacotes, enfim, se tiver alguma dúvida quanto a isso volte ao capítulo 2.
+
+8.6.4 - Um código real para esse caso...
+
+Vamos ver um uso prático desse tipo de classe, inclusive vamos utilizar o mesmo exemplo do início do capítulo quando falávamos de classes estáticas, modificaremos um pouco o código exibido anteriormente:
+
+import java.util.*;
+public class WeekAnonymous {
+   private int weeknr;
+   private int year;
+   public WeekAnonymous(int weeknr, int year) {
+   this.weeknr = weeknr;
+         this.year = year;
+   }
+   public Iterator getDays() {
+   return new Iterator() {
+      private int index = 0;
+      private Calendar cal = null;
+      private Calendar getCalendar () {
+         if (cal == null) {
+            cal = new GregorianCalendar();
+                 cal.clear();
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.WEEK_OF_YEAR, weeknr);
+         }
+         return cal;
+      }
+      public boolean hasNext() {
+                  return index < 7;
+      }
+      public Object next() {
+         getCalendar().set(Calendar.DAY_OF_WEEK, index++);
+         return getCalendar().getTime();
+      }
+      public void remove() {
+      // not implemented
+      }
+            };
+         }
+         public static void main(String[] args) {
+    // list the days of the week
+    if (args.length < 2) {
+      System.err.println("Usage: java Week <weeknr> year>");
+      System.exit(1);
+    } else {
+      try {
+        int weeknr = Integer.parseInt(args[0]);
+        int year = Integer.parseInt(args[1]);
+        Week wk = new Week(weeknr, year);
+        for (Iterator i=wk.getDays();i.hasNext();) {
+          System.err.println(i.next());
+        }
+      } catch (NumberFormatException x) {
+        System.err.println("Illegal week or year");
+      }
+   }
+        }
+}
+
+
+Note que o código acima não criou uma classe estática como no início do capítulo, nesse caso foi criada uma classe anônima para resolver o mesmo problema, com isso podemos inferior que a utilização de classes internas é um assuntos extremamente relativo, podemos ser utilizado de diversas maneiras.
+
+Esses exemplos foram tirados do guia de certificação da Sun !
+
+Para encerrar esse assunto de classes anônimas, gostaríamos de explanar que o uso de classes anônimas são freqüentemente utilizadas em desenvolvimento de ambientes gráficos quando se usa AWT ou Swing principalmente para tratamento de eventos.

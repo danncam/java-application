@@ -1,0 +1,838 @@
+Capítulo 6 - java.lang - a classe Math, Strings e Wrappers
+
+6.1 - String
+
+Objetos String são inalteráveis, porém as variáveis de referências não.
+
+Essa afirmação pode ser contenciosa mais não é. Quando um objeto String é criado na memória, ele não poderá ser alterado, vejamos o código:
+
+String s1= "abc";
+String s2 = s1;
+s1 = "abcd";
+
+
+Observe que ambas as variaveis de referências apontam (ops! isso não é C, referenciam) para o mesmo objeto na memória, se listássemos o valor das variáveis s1 e s2 obteríamos os resultados:
+
+s1 -> "abcd"
+s2 -> "abc"
+
+Note que a string "abc" não foi alterada, pois s1 esta agora referenciando um outro objeto "abcd" ! Enquanto que s2 continua referenciando "abc".
+
+Verbalmente esse código diz o seguinte: "JVM, por favor, crie uma string no pool de strings (depois detalharemos sobre isso) com o valor "abc" obrigado.". Agora, s2 guarda o endereço físico da mesma string "abc" (nenhum string foi criada no pool), na terceira linha, soará uma voz: "Crie uma string "abcd" (veja que não foi alterada a primeira string) onde s1 a referenciará, obrigado.". Com isso podemos concluir que s2 continua referenciando a string "abc", mas que a referencia s1 foi alterada e a string "abc" não.
+
+Se um nova String for criada e não for atribuida a nenhuma variável de referência, ela ficará perdida.
+
+O consumo de memória é um dos pontos críticos para que um programa seja bem sucedido, o uso incorreto da "escassa memória" (a não ser que seu programa vá rodar em um equipamento com 32 gb e memória) pode gerar falhas irreparáveis em um programa, com essa preocupação a Sun (criadora da especificação Java se você não sabe), criou um pool de String que armazena todas as strings coincidentes em um programa Java, ou seja, se você tiver duas variáveis que referenciam uma string "kuesley é legal" saiba que você só terá uma string no pool, porém duas referências e, é por esta razão que as strings são inalteráveis. Mas se você criar um string e não especificar nenhuma variável de referência ela ficará perdida - o que os criadores da linguagens não gostarão nem um pouquinho se olharem para o seu código, pois você estaria desprezando todo o esforço deles em otimizar o uso da memória. Vejamos um exemplo prático disso:
+
+String s1 = "abc";
+String s2 = "abcd" + "e";
+
+
+Saiba que o código acima criará no pool 4 strings, sendo que duas ficaram perdidas ("abcd","e"), pois somente as string "abc" e "abcde" estão sendo referenciadas.
+
+Se você redirecionar a referencia de uma String para outra String, o objeto String anterior poderá ser perdido.
+
+String s1 = "abcd";
+s1 = "xuxu";
+
+
+O que o código acaba de fazer é criar uma string no pool "abcd" e referenciá-lo por s1, depois criar um nova string "xuxu" e referenciá-lo pela mesma variável s1, portanto, a string "abcd" ficará perdida no pool.
+
+O método substring
+
+O método que errôneamente foi definido com substring - pois deveria ser subString, recebe dois argumentos do tipo inteiro, onde define a posição inicial da string (começando do 0) e onde deve terminar a string (começando de 1), isso quer dizer que:
+
+"abcdefghijlmnop".substring(0,3);   // resulta em: abc
+
+
+Pois o primeiro argumento é considerado o início em 0 e o segundo o início é considerado em 1, lembre-se disso.
+
+String s = "kuesley e legal";
+System.out.println(s.substring(8,15));
+
+
+Resultado: "e legal"
+
+A classe String é final
+
+Nenhum método da classe String pode ser substituído, visto que a classe é final.
+
+Métodos da String
+
+concat - Adiciona umab string a outra, porém não altera a string em que o método está sendo executado:
+
+String s = "teste";
+s.concat("nao mudou");
+System.out.println(s);   // Resultado "teste"
+
+
+Note que nenhuma alteração foi efetuada na string s. Se desejássemos alterar s, o código deveria ser da seguinte forma:
+
+String s = "teste";
+s = s.concat("nao mudou");
+System.out.println(s);   // Resultado "teste nao mudou"
+
+
+equalsIgnoreCase - testa se uma string é igual a outra ignorando a diferença entre letras maiúsculas e minúsculas:
+
+String sl = "teste";
+String su = "TESTE";
+System.out.println(sl.equals(su));      // resultado: false
+System.out.println(sl.equalsIgnoreCase(su));   // resultado: true
+
+
+length - Obtém o tamanho da string.
+
+String nome = "angeline jolie";
+System.out.println(nome.length() );      // resultado: 14
+
+
+replace - Substitui os caracteres de uma string.
+
+String texto = "Est4mos 4qui p4r4 test4r";
+texto = texto.replace('4','a');
+System.out.println(texto);   // resultado: Estamos aqui para testar
+
+
+substring - Extrai uma string de outra.
+
+String texto = "0123456789";
+System.out.println(texto.substring(0,3));   // resultado: 012
+
+
+Já falamos anteriormente, mas queremos ser chatos mesmo, o primeiro argumento considerada a string iniciando na posição 0, enquando que o segundo em 1 - por isso que o resultado anterior é "012".
+Se for especificado um valor inválido para qualquer um dos dois argumento, uma exceção será lançada.
+
+String texto = "0123456789";
+System.out.println(texto.substring(0,11));   // exceção
+
+
+Uma exceção será lançada: java.lang.StringIndexOutOfBoundsException: String index out of range: 11
+
+toLowerCase - Muda todas as letras que estiverem maiúscula para letra minúscula.
+
+1) Qual o resultado do trecho de código acima ?
+
+String s = "AKJDJE";
+s.toLowerCase();
+System.out.println(s);
+
+
+a) Erro de compilação
+b) Exceção
+c) AKJDJE
+d) Akjdje
+e) akjdje
+
+
+Errou ??? Não esqueça que a string são inalteráveis. Portando s não está sendo reatribuido.
+
+toUpperCase - Processo inverso do toLowerCase, ou seja, transforma em maiúscula todas as letras que estiverem minúscula.
+
+String s = "teste de caixa alta";
+s = s.toUpperCase();
+System.out.println(s);   // resutlado: TESTE DE CAIXA ALTA
+
+
+trim - Retira espaços das extremidades de uma string.
+
+String s = " tem um ";
+s = s.trim()
+System.out.println("*"+s.trim()+"*");   // resultado: *tem um*
+
+
+toString - retorna o valor da string. (método inútil : ) )
+
+Como a classe String é derivada de Object esse método é substituído na classe String retornando o valor da String propriamente dita.
+
+String s = "mesma coisa";
+System.out.print(s.toString());   // resultado: mesma coisa
+
+
+equals - compara o valor de uma string com outra informada em argumento.
+
+String s1 = "texto";
+String s2 = "texto";
+System.out.println(s1 == s2);      // resultado 1: true
+System.out.println(s1.equals(s2));   // resultado 2: true
+s1 = new String("texto");
+s2 = new String("texto");
+System.out.println(s1 == s2);      // resultado 3: false
+System.out.println(s1.equals(s2));   // resultado 4: true
+
+
+O resultado 1 é true em função da string "texto" ser criada uma única vez e ser referenciado pelos objetos s1 e s2. O resultado 2 é verdadeiro pois o método equals está comparando os valores. Já o resultado 3 é falso, pois como os objetos foram criados usando a palavra chave new você terá dois objetos na memória apesar de terem os mesmos valores, já o resultado 4 é true pois o método equals sempre irá comparar os valores, como ambos os objetos tem os mesmos valores o resultado é true. Com isso podemos concluir que, o operador == compara se os variáveis de referência estão referenciando o mesmo objeto, se for o caso retorna true caso contrário retorna falso, enquanto que o método equals da classe String sempre irá comparar os valores (não pense que esse método funciona da mesma forma para a classe StringBuffer, isso é o oitavo pecado capital).
+
+6.2 StringBuffer
+
+Diferente da classe String, a classe StringBuffer pode sofrer alteração.
+
+StringBuffer sb = new StringBuffer("testando");
+sb.append(" se mudou");
+System.out.println(sb);
+
+
+Resultado: testando se mudou
+
+Observe que o valor de sb foi alterado mesmo que não tenha sido atribuído à sb, ou seja, o método append atuou sobre sb.
+
+StringBuffer - métodos importantes
+
+append - esse método adiciona uma string ao StringBuffer
+
+StringBuffer sb = new StringBuffer("abc");
+sb.append("def");
+System.out.println(sb);   // Resultado: abcdef
+
+
+insert - insere uma string em um StringBuffer, começando em 0 (zero)
+
+StringBuffer sb = new StringBuffer("abc");
+sb.insert(1,"x");
+System.out.println(sb);   // Resultado: axbc
+
+
+Se um valor inválido for inserido no primeiro argumento, uma exceção será lançada.
+
+Como você pode conferir no exemplo abaixo:
+
+StringBuffer sb = StringBuffer sb = new StringBuffer("abc");
+sb.insert(4,"x");
+System.out.println(sb);
+
+
+Um exceção será lançada: StringIndexOutOfBoundsException, não esqueça que a posição tem início em 0 (zero).
+
+Uma observação vale ser ressaltada, visto que você poderá se deparar com uma questão como:
+
+StringBuffer sb = StringBuffer sb = new StringBuffer("abc");
+sb.insert(3,"x");
+System.out.println(sb);
+
+
+Você pode pensar, "bom se posição inicia em 0 (zero), então o limite para o primeiro argumento é 2, pois é o índice maior dessa string, mas o método deve possibilitar uma inserção após a letra "c" então qual seria o índice ??? 3 - exatamente. Nenhum problema ocorrerá no código acima, e o resultado seria: "abcx"
+
+reverse - inverte todos os caracteres da StringBuffer.
+
+StringBuffer sb = new StringBuffer("kuesley");
+sb.reverse();
+System.out.println(sb);   // resultado: yelseuk
+
+
+toString - retorna o valor do objeto StringBuffer, esse método é herdado de Object.
+
+StringBuffer sb = new StringBuffer("kuesley");
+sb.reverse();
+System.out.println(sb);      // resultado: yelseuk
+System.out.println(sb.toString());   // resultado: yelseuk
+
+
+Exatamente o mesmo resultado do próprio objeto.
+
+equals
+
+O método equals da classe StringBuffer não é substituído, isso significa que ele não compara valores, portanto uma questão com essa consideração pode confundir, vejamos:
+
+StringBuffer sb1 = new StringBuffer("kuesley");
+StringBuffer sb2 = new StringBuffer("kuesley");
+System.out.println( sb1.equals(sb2) );         // resultado: false
+
+
+Apesar de conterem o mesmo valor, o resultado será false pois é comparado se as variáveis, referenciam o mesmo objeto na memória, e como existem 2 objetos distintos na memória, o resultado é false.
+
+Encadeamento de métodos
+
+Você poderá se deparar também com questão que encadenham métodos como:
+
+2) Dado o codigo abaixo, qual será o resultado ?
+
+StringBuffer sb = new StringBuffer("kuesley");
+System.out.println(sb.insert(sb.length()," é legal").reverse().toString());
+
+
+a) Uma exceção será lançada
+b) Erro de compilação
+c) KUESLEY É LEGAL
+d) kuesley é legal
+e) lagel é yelseuk
+
+Resposta no final do capítulo !!!
+
+Observe que os métodos foram executados da ESQUERDA para a DIREITA exatamente como se lê, ou seja, o primeiro método que foi executado foi o insert alterando o objeto sb, mudando a StringBuffer para "kuesley é legal", depois foi invertido a string "odnil é yelseuk" depois o método toString que, aqui pra nós, não faz nada !!!
+
+6.3 Usando a classe Java.lang.Math
+
+abs
+
+Retorna o valor absoluto de um argumento, veja suas assinaturas:
+
+public static int abs( int value )
+public static long abs( long value )
+public static float abs(float value )
+public static double abs(double value )
+
+Observe que ele é sobreposto para aceitar qualquer tipo primitivo a exceção de double e float. O resultado sempre será um número positivo a exceção de dois casos, mas como ainda não sei, não colocarei aqui, mas tem !
+
+Agora já tô sabendo, Hhehehe
+
+Se o valor informado for menor que Interger.MIN_VALUE ou Long.MIN_VALUE veja o exemplo a seguir:
+
+System.out.println("Valor absoluto para "+Math.abs(-2147483648));
+// Resultado: -2147483648
+
+System.out.println("Valor absoluto para "+Math.abs(-9223372036854775808L));
+// Resultado: -9223372036854775808L
+
+System.out.println("Valor absoluto para "+Math.abs(-2147483647);
+// Resultado: 2147483647
+
+System.out.println("Valor absoluto para "+Math.abs(-9223372036854775807L));
+// Resultado: 9223372036854775807
+
+Onde:
+
+Integer.MIN_VALUE -> -2147483648
+Long.MIN_VALUE -> -9223372036854775808
+
+Note que quando o valor informado for igual ao valor de Integer.MIN_VALUE e Long.MIN_VALUE a função não retorna o valor absoluto, isso é só para complicar nossa vida.
+
+ceil
+
+Retorna o número "ponto flutuante inteiro" superior mais próximo.
+
+public static float ceil(float value)
+public static double ceil(double value)
+System.out.println(Math.ceil(3.8));   // Resultado: 4.0
+System.out.println(Math.ceil(-3.3));   // Resultado: -3.0
+
+
+floor
+
+Retorna o número ponto flutuante inteiro inferior mais próximo.
+
+public static float floor(float value)
+public static double floor(double value)
+
+System.out.println(Math.floor(-10.9));   // Resultado: -11.0
+System.out.println(Math.floor(12.2));   // Resultado: 12.0
+
+
+max
+
+Esse método retorna o maior número entre dois informados, sua assinatura de métodos é:
+
+public static int max(int a, int b )
+public static long max(long a, long b )
+public static float max(float a, float b )
+public static double max(double a, double b )
+
+
+Observe que não existe assinatura para os tipos byte, short porque esse podem implicitamente ser convertidos para int.
+
+System.out.println("O maior entre -8 e -9 é: "+Math.max(-8,-9));   // Resultado: -8
+System.out.println("O maior entre -8 e 9 é: "+Math.max(-8.0,9));   // Resultado: 9.0
+
+
+Por mais que não exista um método com as assinaturas (double, int) seguindo as regras de valores literais da Java, o valor 9 é convertido implicitamente para double por isso o resultado é: 9.0 um tipo double.
+
+
+min
+
+Esse método retorna o menor número entre dois informados, suas assinaturas são:
+
+public static int min(int a, int b )
+public static long min(long a, long b )
+public static float min(float a, float b )
+public static double min(double a, double b )
+
+Observe que não existe assinatura para os tipos byte, short porque esse podem implicitamente ser convertidos para int.
+
+System.out.println("O menor entre -8 e -9 é: "+Math.max(-8,-9));   // Resultado: -9
+System.out.println("O menor entre 8 e -9 é: "+Math.max(8,-9.0));   // Resultado: 8.0
+
+
+Por mais que não exista um método com as assinaturas (int, double) seguindo as regras de valores literais da Java, o valor 8 é convertido implicitamente para double por isso o resultado é: 8.0 um tipo double.
+
+
+round
+
+Arredonda um numero ponto flutuante recebido como argumento, veja suas assinaturas:
+
+public static int round(float a)
+public static long round(double a)
+
+Note que como sua função é arredondar, deve retornar um tipo inteiro, porém como o argumento pode ser um float (32 bits) ou um double (64 bits) o retorno deve suportar essa quantidade de bits por isso o tipo de retorno muda conforme o argumento de entrada.
+
+class Teste {
+    public static void main(String args[]) {
+   System.out.println(Math.round(9.4));      // Resultado: 9
+   System.out.println(Math.round(9.5));      // Resultado: 10
+   System.out.println(Math.round(9.9));      // Resultado: 10
+   System.out.println(Math.round(-9.9));      // Resultado: -10
+    }
+}
+
+
+Para entender, vamos dividir em duas regras:
+
+1) Número positivo:
+
+Arredondando um número positivo: o algoritmo soma ao número informado 0.5 e trunca o número, como podemos ver a seguir:
+
+|3.9| +	0.5 = 4.4 // Resultado: 4
+|3.5| + 0.5 = 4.0 // Resutlado: 4
+|3.4| + 0.5 = 3.9 // Resultado: 3
+
+Funciona exatamento como os métodos Math.ceil (se o número decimal for maior ou igual a 0.5) e Math.floor (se o número decimal for menor que 0.5) !
+
+2) Número negativo:
+
+|-3.9|	+	0.5	=	-4.4	// Resultado: -4
+|-3.4|	+	0.5	=	-3.9	// Resultado: -3
+|-3.5|	+	0.5	=	-4.0 (deveria), mas o resultado é: -3
+
+Pode parecer estranho o fato de que no primeiro caso o resultado foi -4 onde o esperado fosse -3, porém nesse caso o round ignora o sinal, ou seja, trabalha com números absolutos - porém como os criados da linguagem java gostam de complicar, existe um exceção no caso de número negativo quando o valor decimal do número for 0.5 o número será arredondado para cima.
+
+Vejamos exemplos:
+
+Math.round(-3.5) // Resultado: -3
+Math.round(3.5) // Resultado: 4
+
+Math.round(-3.4) // Resultado: -3
+Math.round(-3.6) // Resultado: -4
+
+random
+
+O método Math.random retorna um número aleatório entre 0.0 e menor que 1.0.
+
+public static double random()
+
+System.out.println( Math.random() );	// Resultado: qualquer valor entre 0.0 (inclusive) e menor que 1.0
+
+sin
+
+Retorna o seno de um ângulo, para o exame você terá que saber como calcular o sena de qualquer espécie de ângulo, precisará ser um matemático e físico (calma, não desista, só estava brincando) ! Você não precisará saber como se calcula nenhum ângulo, basta saber que recebe um argumento que é um valor de um ângulo em radiano.
+
+public static double sin(double a)
+
+cos
+
+Calcula o co-seno de um ângulo.
+
+public static double cos(double a)
+
+tan
+
+Retorna a tangente de um ângulo.
+
+public static double tan(double a)
+
+Lembre-se que esse três último métodos recebe um valor de grau em radiano, não tente passar por exemplo 90" como parâmetro que você poderá ser supreendido com um resultado: prédio no chão !!! (os engenheiros que me perdoe)
+
+sqrt
+
+Retorna a raiz quadrada de um número.
+
+public static double sqrt(double a)
+
+System.out.println(Math.sqrt(9));	// Resultado: 3
+
+Como você é um cara esperto, deve estar se perguntando: "E se tentar passar um número negativo para obter a raiz quadrada ? " - aahah, eu sabia que você questionaria isso. Como todos sabem, pelo menos uma grande maioria, tá bom, algumas pessoas, ou melhor um grupo bem seleto, ufa!, sabe que não existe raiz quadrada de um número negativo, portanto se você passar -9 para esse método, você obterá um resultado NaN (Not a Number - ou Não é um número).
+
+toDegrees
+
+Retorna um valor de um ângulo em graus, para isso você deve passar um ângulo em radiano.
+
+public static double toDegrees(double a)
+
+Math.toDegrees(Math.PI * 2.0)	// Retorna: 360.0
+
+toRadians
+
+Retorna em radiano um ângulo informado em graus.
+
+public static double toRadians(double a)
+
+Exemplo:
+
+Calculando o seno de um ângulo
+
+System.out.println("O seno de 90\" é: "+Math.sin(Math.toRadians(90.0))); // Resultado: 1.0
+
+Note que usamos dois métodos encadeados para que o cálculo fosse realizado, visto que o método sin recebe um valor em radiano e por isso usamos o método toRadians para converter 90.0 (em graus) para radiano.
+
+Algumas observações sobre a classe Math
+
+double x;
+
+float p_i = Float.POSITIVE_INFINITY;
+
+double n_i = Double.NEGATIVE_INFINITY;
+
+double n_a_n = Double.NaN;
+
+if ( n_a_n != n_a_n) System.out.println("NaN é diferente de NaN");
+// Será ecoada, pois NaN não é igual a nada inclusive a NaN
+
+if (Double.isNaN(n_a_n)) System.out.println("é um NaN");
+// resultado: é um NaN
+
+x = Math.sqrt(n_i);
+// Alerta geral ! será atribuído NaN para x
+
+if (Double.isNaN(x)) System.out.println( "x é um NaN");
+// Resultado: x é um NaN
+
+System.out.println( 32 / 0 );
+// Resultado: java.lang.ArithmeticException
+
+System.out.println( 32.0 / 0.0 );
+// Resultado: Infinity
+
+System.out.println( -32.0 / 0.0 );
+// Resultado: -Infinity
+
+System.out.println( 32.0 / -0.0 );
+// Resultado: -Infinity
+
+System.out.println( -32.0 / -0 );
+// Resultado: -Infinity
+
+System.out.println( 32.0 / -0 );
+// Resultado: Infinity
+
+System.out.println( -32.0 / -0.0 );
+// Resultado: Infinity (ops! jogo de sinal, vamos entender isso mais abaixo)
+
+É bom ressaltar uma regra ou melhor exceção quando envolvemos números ponto-flutuante em Java.
+
+3) Dado o código, o que acontecerá ?
+
+1. public class Test {
+2.    public static void main(String[] args) {
+3.   System.out.println( " -32.0 / -0.0 -> " + -32.0 / -0.0 );
+4.   System.out.println( " -32.0 /  0.0 -> " + -32.0 /  0.0 );
+5.   System.out.println( "  32.0 /  0.0 -> " +  32.0 /  0.0 );
+6.   System.out.println( "  32.0 / -0.0 -> " +  32.0 / -0.0 );
+7.   System.out.println( " -32 / -0.0 -> " + -32 / -0.0 );
+8.   System.out.println( "  32 / -0.0 -> " +  32 / -0.0 );
+9.   System.out.println( " -32 /  0.0 -> " + -32 /  0.0 );
+10.   System.out.println( "  32 /  0.0 -> " +  32 /  0.0 );
+11.   System.out.println( " -32.0 /  0 -> " + -32.0 /  0 );
+12.   System.out.println( " -32.0 / -0 -> " + -32.0 / -0 );
+13.   System.out.println( "  32.0 /  0 -> " +  32.0 /  0 );
+14.   System.out.println( "  32.0 / -0 -> " +  32.0 / -0 );
+15.   System.out.println( " -32 / -0 -> " + -32 / -0 );
+16.   System.out.println( " -32 /  0 -> " + -32 /  0 );
+17.   System.out.println( "  32 / -0 -> " +  32 / -0 );
+18.   System.out.println( "  32 /  0 -> " +  32 /  0 );
+19.   System.out.println( "" );
+20.   }
+21. }
+
+
+a) Erro de compilação
+b) java.lang.ArithmeticException na linha 17
+c) Mostrará os valores fazendo jogo de sinal para as divisões
+d) Erro de compilação na linha 19
+e) java.lang.ArithmeticException na linha 15
+
+[color=green:430f7a8ef7]Resposta no final do capítulo !!![/color:430f7a8ef7]
+
+Entendendo como Java trata a divisão por 0 (zero)
+
+Para ajudar entender as regras abaixos, você precisará saber que:
+
+|
+86 |__2__
+43
+0
+
+Onde:
+
+86 é o divisor
+2 é o dividendo
+43 é o quociente
+0 é o resto
+
+Peço desculpas aos que já conhecem essa antiga convenção. ": )"
+Maiores informações visite o site:
+http://educar.sc.usp.br/matematica/m4p1t6.htm
+
+Continuando...
+
+Quando o divisor e o dividendo forem números inteiros:
+
+Se o divisor for 0, será lançada uma exceção.
+
+System.out.println( 32 / 0 );   // exceção
+System.out.println( -32 / -0 );   // exceção
+
+
+Quando a operação envolver pelo menor um número ponto flutuante:
+
+Quando o divisor for 0:
+
+NUNCA HAVERÁ A TROCA DE SINAIS, SEMPRE SERÁ MANTIDO O SINAL DO DIVIDENDO
+
+System.out.println( 32.0  /  0  ); // resultado: INFINITY
+System.out.println( -32.0 /  0  ); // resultado: -INFINITY
+System.out.println( 32.0  / -0  ); // resultado: INFINITY
+System.out.println( -32.0 /  -0  ); // resultado: -INFINITY
+
+
+Quando o divisor é 0.0 ou maior:
+
+SEMPRE HAVERÁ A TROCA DE SINAIS
+
+System.out.println( 32.0  /  0.0  );    // resultado: INFINITY
+System.out.println( -32.0 /  0.0  );    // resultado: -INFINITY
+System.out.println( 32.0  / -0.0  );    // resultado: -INFINITY
+System.out.println( -32.0 /  -0.0  );   // resultado: INFINITY
+System.out.println( 32  /  0.0  );    // resultado: INFINITY
+System.out.println( -32 /  0.0  );    // resultado: -INFINITY
+System.out.println( 32  / -0.0  );    // resultado: -INFINITY
+System.out.println( -32 /  -0.0  );   // resultado: INFINITY
+System.out.println( -32.0 / -1 );   // resultado: 32.0
+System.out.println( -32.0 / 1 );   // resultado: -32.0
+System.out.println( 32.0 / -1 );   // resultado: 32.0
+System.out.println( 32 / -1 );      // resultado: -32
+System.out.println( -32 / 1 );      // resultado: -32
+System.out.println( 32 / 1 );      // resultado: 32
+
+
+Relembrando...
+
+Você pode ser pego de surpresa durante o exame quando se deparar com questões envolvendo operações matemáticas e tipos primitivos, porém para vencermos os crápulas do exame, vamos entender algumas regrinhas:
+
+1) Regra geral: Já foi discutido no capítulo 3 mas vale a pena relembrar, toda operação envolvendo numeros inteiro SEMPRE retornará um tipo int.
+
+Vejamos:
+
+public class Test {
+    public static void main(String[] args) {
+   byte b = 127;         // tamanho 8 bits
+   short s = 127;         // tamanho 16 bits
+   short x = s * b;         // deveria funcionar, mas dá erro de compilação
+   System.out.println(x);
+    }
+}
+
+
+Se tentarmos compilar o programa anterior receberíamos um insulto por parte do compilador, pois como já dissemos, todo resultado de uma operação entre tipos inteiros SEMPRE resultará em int e um tipo short não pode suportar um int sem conversão explícita.
+
+public class Test {
+    public static void main(String[] args) {
+   byte b = 127;         // tamanho 8 bits
+   short s = 127;         // tamanho 16 bits
+   short x = (short)s * b;      // deveria funcionar, mas também dá erro de compilação
+   System.out.println(x);
+    }
+}
+
+
+Esse código não funcionará, pode confirmar, pois o compilador não consegue saber os valores das variáveis em tempo de compilação e com isso, não pode efetuar a conversão explícita !
+Vale também ressaltar que se a variável x fosse long, o código seria compilado, pois um tipo int pode perfeitamente ser atribuídos à uma variável do tipo long.
+
+6.4 - Usando as classes Wrappers
+
+As classes wrappers tem o papel de encapsular os tipos primitivos para a possibilidade de operações como: conversões, mudança de bases decimais, e algumas operação que somente a objetos é permitido, como por exemplo, trabalhar com conjuntos (que será abordado no capítulo seguinte).
+
+Todo tipo primitivo tem uma classe wrapper correpondente, vejamos:
+
+tipo primitivo	 classe wrapper
+
+byte	 Byte
+short	 Short
+int	 Integer
+long	 Long
+char	 Character
+float	 Float
+double	 Double
+boolean	 Boolean
+
+Note que os nomes das classes wrapper tem o mesmo nome dos tipos primitivos, a exceção de Integer e Character, e isso não teve nenhuma graça por parte dos desenvolvedores.
+
+Para criar um objeto podemos fazer da seguinte forma:
+
+Integer a = new Integer("10");
+Integer b = new Integer(10);
+
+
+Note que as classes tem os construtores sobrecarregados, ou seja, aceitam o valor String e o valor int no caso anterior, vejamos outro exemplo:
+
+Float f1 = new Float("14.0f");
+Float f2 = new Float(14.0f);
+Boolean b1 = new Boolean("TRUE");
+Boolean b2 = new Bolean(true)
+
+
+No caso da classe Boolean, você poderá instanciar um objeto passando uma string TRUE ou FALSE, independente se estas forem maiúsculas ou minúsculas.
+
+6.4.1 - métodos importantes
+
+valueOf()
+xxxValue()
+parseXxx()
+
+Os métodos acima devem ser compreendidos para o sucesso nas respostas sobre as classes Wrappers.
+
+6.4.1.1 - o método valueOf()
+
+É um método estático que quase todas classes wrapper tem que retorna o objeto wrapper a classe relacionada. Esse método tem uma funcionalidade muito interessante, pois pode converter números em bases diferentes, vejamos:
+
+Integer i1 = Integer.valueOf("89");
+
+
+Retorna um objeto Integer na base decimal.
+
+Integer i2 = Integer.valueOf("89",2);
+
+
+Tentativa de retornar um objeto Integer, porém nesse caso foi especificado a base 2 (binário) como "89" nunca foi e nunca será um número binário, essa linha gerará um exceção java.lang.NumberFormatException.
+
+Não pense em usar:
+
+Float.valueOf("89.0",2) ou
+Double.valueOf("89.0",2)
+
+
+que você terá um erro de compilação, pois as classes Float e Double não tem esse método com essa assinatura.
+
+Float f1 = Float.valueOf("10f");
+Float f2 = Float.valueOf("10.0f");
+
+
+Porém as linhas acima seriam compiladas sem nenhum problema.
+
+NÃO ESQUEÇA: Não pense que esse método é sobrecarregado como os construtores permitindo que você passe o tipo primitivo diretamente:
+
+Float f1 = Float.valueOf(10f);
+
+Isso seria repulsivo ao compilador.
+
+
+6.4.1.2 - o método xxxValue()
+
+Assinatura do método:
+
+public int intValue()
+public byte byteValue()
+public short shortValue()
+public long longValue()
+public float floatValue()
+public double doubleValue()
+
+
+Observe que não são métodos estáticos.
+
+Esse método tem a função de realizar conversões dentro das classes wrapper, pois como dissemos é uma característica dessas classes:
+
+public class TestWrappers {
+   public static void main(String[] args) {
+      Float w = Float.valueOf("89f");
+      int i = w.intValue();
+      System.out.println(w.toString());
+      System.out.println(i);
+     }
+}
+
+
+O programa acima está fazendo uma conversão do valor que o objeto w está armazenando e convertendo para o tipo primitivo int. Poderíamos converter para qualquer outro, vejamos:
+
+byte b = w.byteValue();
+short s = w.shortValue();
+
+
+6.4.1.3 - o método estático parseXxx()
+
+Outra forma de se converter é usando os métodos parse´s, vejamos um exemplo bem simples para entender como isso funciona:
+
+Imaginemos que você não precise criar um objeto wrapper necessariamente para realizar uma conversão, você pode usar o método parseXxx para realizar tal tarefa:
+
+int i = Integer.parseInt("10");
+
+A string passada como parâmetro deve corresponder a um tipo primitivo int, senão uma exceção será lançada como podemos observar no exemplo a seguir:
+
+int i = Integer.parseInt("10f");
+
+Nesse caso uma exceção será lançada: java.lang.NumberFormatException
+
+
+6.4.1.4 - o método toString()
+
+O método toString() tem uma funcionalidade semelhante as vistas até aqui. E alem do mais as classes Wrapper tem um método estático toString() sobrecarregado, ou seja, se você precisar transformar uma variável int em String, você pode usar:
+
+int i = 10;
+
+Opção 1:
+String s = ""+ i;
+
+Opção 2:
+String s = new Integer(i).toString();
+
+Opção 3:
+String s = Integer.toString(i);
+
+
+Você concordará comigo que a opção 3 é a mais elegante, visto que não cria nenhum objeto na memório, e a opção 1 não vou nem me estressar em definir aquilo. (mas acreditem eu já usei!)
+
+Você também poderá chamar o método toString do objeto:
+
+Float f = Float.valueOf("10.0");
+System.out.println(f.toString());
+
+
+6.4.1.5 - convertendo bases com toString()
+
+As classes Integer e Long tem dois métodos estáticos que podem ser usados para realizar conversão de bases decimais, vejamos:
+
+Classe Integer:
+public static String toString(int i, int radix)
+
+Classe Long:
+public static String toString(long i, int radix)
+
+Você poderá realizar conversões entre bases da seguinte forma:
+
+String s1 = Integer.toString(256,16);
+String s2 = Integer.toString(256,2);
+
+
+O código acima retorna para a variáveis s1 e s2, o valores correspondentes a 256 em Hexa (base 16) e em Binário (Base 2).
+
+Para encerrarmos esse estudo, ainda temos os métodos estáticos nomeados:
+
+Classe Integer:
+public static String toHexString(int i)
+public static String toBinaryString(int i)
+public static String toOctalString(int i)
+
+Classe Long:
+public static String toHexString(long i)
+public static String toBinaryString(long i)
+public static String toOctalString(long i)
+
+Exemplo de uso:
+
+String s1 = Integer.toHexString(123);
+
+O código acima transforma o inteiro 123 em Hexadecimal.
+
+Métodos que lançam a exceção NumberFormatException
+
+- Todos os contrutores das classes wrapper numéricas
+- os métodos estáticos valueOf
+- os métodos estáticos toString de Integer e Long
+- os métodos parseXxx
+
+Bom chegamos ao final de mais um capítulo !!
+
+
+Respostas dos exercícios propostos:
+
+1) c
+
+2) e
+
+3) e

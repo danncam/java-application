@@ -1,0 +1,615 @@
+Capítulo 3 - Operadores e atribuições
+
+3.1 - Introdução
+
+A compreensão desse capítulo é muito importante pois trata de um assunto essencial em qualquer linguagem de programação, as diversas formas de se atribuir e manipular valores de uma variável. Além de ser um dos elementos fundamentais de uma linguagem de programação, as variáveis tem um papel importante na geração de programas e suas peculiaridades serão abordadas nesse capítulo (pelo menos é o que esperamos) !
+
+A forma mais elementar de se atribuir um valor a uma variável é:
+
+x = 0;
+
+Mas não espere que no exame, haja perguntas com esse desprezo de complexidade, muito pelo contrário, o que normalmente você não utiliza ou nunca utilizou com certeza estarão lá (naquela bendita prova)!!!
+
+byte x = 10;
+
+Lembra-se do capítulo 1 ? Que na linha anterior 10 é um valor literal int, composto por 32 bits e que um tipo byte só tem capacidade para armazenar 8 bits. Você deve estar se perguntando e o que acontece com o resto dos bits ? Calma, para todas essas perguntas em algum lugar no universo haverá uma resposta. Nesse caso o compilador é generoso e executa a conversão implicitamente para você. Portanto uma variável nada mais é do que um repositório de bits para a representação de algum valor. O que está armazenado na variável x ? Se você respondeu 00001010 está no caminho certo para o sucesso de sua certificação ! Como o compilador realizou a conversão de int para byte, os 24 bits de diferença foram desprezados.
+
+byte x = 19; // ok
+byte y = x; // ok
+byte z = x + y;	// deveria aceitar, mas necessita de uma conversão explícita.
+
+Toda operação envolvendo dois tipos inteiros sejam eles (byte e short, long e byte) retornaram um tipo int
+
+Falando em Objetos:
+
+Button b = new Button();
+
+O que b armazena ? Se você pensou em dizer que b armazena um objeto do tipo Button, sua resposta está errada ! b armazena um conjunto de bits usados para acessar (referenciar) o objeto na memória. Portanto, podemos dizer a rigor que b não é um objeto do tipo Button e sim uma forma (através de uma sequência de bits) usada para acessar esse objeto na memória.
+
+Falando um pouco sobre atribuições de número primitivos
+
+Atribuição	 Observação
+
+byte a = 19;	 byte a = (byte)19;
+byte b = 128;	 // Não é possível sem uma conversão explícita
+byte c = (byte)128;	// Ok
+
+O valor 128 não pode ser atribuído à variável b por ultrapassar a capacidade em bits do tipo byte - uma conversão se faz necessária. Mas devemos ressaltar um acontecimento muito interessante nesse caso. Qual o valor da variável c da atribuição anterior ?
+
+Entenda o que acontece:
+
+0000 0000 0000 0000 0000 0000 1000 0000 <--> +128
+
+Como o compilador despreza os primeiros 24 bits (pois o tipo byte só comporta 8 bits) ficamos com:
+
+1000 0000
+
+Se você é um cara esperto sabe que o bits da extrema esquerda deverá ser usado para armazenar o sinal (nesse caso negativo), como temos um número negativo agora desejamos saber qual é ! Existe uma regra que você deverá se familiarizar que é usada para decobrir o valor de um número negativo em bits:
+
+Primeiro inverta todos os bits do número, assim temos:
+
+0111 1111
+
+Transforme esse número em decimal e acrescente 1
+
+127 + 1 = 128
+
+Aplique o bit do sinal e terá o valor: -128 !
+
+Exercite isso com o número 140, 147 !
+
+Você deverá obter: -116, -109
+
+3.2 - Atribuição de Tipos Primitivos
+
+
+Atribuições elementares não precisam ser discutidas, pois você já deve está familiarizado, agora um regrinha deve ser lembrada para sempre: toda atribuição que é resultada de uma operação (seja ela qual for: soma, divisão, deslocamento de bits....) envolvendo tipos inteiros (byte, short, int, long) SEMPRE RESULTARÁ EM UM TIPO INT !!!
+
+Portanto:
+
+byte x = 1;	 // ok
+byte y = 2 + 3;	 // ok
+byte z = x + y;	 // deveria aceitar pois 6 cabe perfeitamente em um tipo byte, porém é necessário uma converão explícita
+byte z = (byte)x + y;	// agora sim
+
+3.3 - Deslocamento de Bits
+
+Deslocar bits em número e alterar sua sequencia de armazenamento e só poderá ser feito em TIPOS INTEIROS !!
+
+>>	deslocamento de bits à direita com sinal
+<<	deslocamento de bits à esquerda com sinal
+>>>	deslocamento de bits à direita sem sinal
+
+Deslocamento a direita com sinal ( >> )
+
+int x = 16;
+x = x >> 2;
+
+A variável x estará armazenando ao final da linha de código anterior o valor 4 ! O que o código anterior faz é simplesmente descolar dois bits para a direita, assim temos:
+
+x antes do deslocamento
+
+0000 0000 0000 0000 0000 0000 0001 0000 (base 2)
+16 (base 10)
+
+x depois do deslocamento
+
+0000 0000 0000 0000 0000 0000 0000 0100 (base 2)
+4 (base 10)
+
+O sinal sempre será mantido com esse operador. Um regra bem simples é que quando se desloca à direita é o mesmo que aplicar a seguinte regra matemática:
+
+Para o caso anterior:
+Fórmula: 16 dividido por 2 elevado a x (onde x é a quantidade de bits a deslocar)
+
+Deslocamento a esquerda com sinal ( << )
+
+int x = 16;
+x = x << 2;
+
+x antes do deslocamento
+
+0000 0000 0000 0000 0000 0000 0001 0000 (base 2)
+16 (base 10)
+
+x depois do deslocamento
+
+0000 0000 0000 0000 0000 0000 0100 0000 (base 2)
+64 (base 10)
+
+Outra regrinha que você já deve ter deduzido é:
+Fórmula: 16 multiplicado por 2 elevado a x (onde x é a quantidade de bits a deslocar)
+
+Observe o comportamento em caso de número negativos:
+
+int x = -200;
+x <<= 3;
+
+O resultado de x será: -1600
+
+Note que o sinal é mantido, observe o deslocamento dos bits:
+
+1000 0000 0000 0000 0000 0000 1100 1000 equivale a -200
+
+Após o deslocamento:
+
+1000 0000 0000 0000 0000 0110 0100 0000 equivale a -1600
+
+
+Deslocamento a direita sem sinal ( >>> )
+
+Nesse caso o bit do sinal não é mantido, sendo preenchido com zero no bit da extrema esquerda, portanto exceto em um caso particular que logo logo explicaremos, todo numero deslocado com esse sinal (mesmo que seja um número negativo) fica positivo.
+
+int x = 200;
+x >>>= 2;
+
+O valor de x será 50 após o deslocamento, veja porque:
+
+0000 0000 0000 0000 0000 0000 1100 1000 equivale a 200
+
+Após o deslocamento:
+
+0000 0000 0000 0000 0000 0000 0011 0010 equivale a 50
+
+Agora vamos examinar um número negativo:
+
+int x = -200;
+x >>>= 2;
+
+O valor de x será após o deslocamento, veja porque:
+
+1000 0000 0000 0000 0000 0000 1100 1000 equivale a -200
+
+Após o deslocamento:
+
+0010 0000 0000 0000 0000 0000 0011 0010	equivale a 1073741774
+
+Existe uma particularidade que você deve estar atento no caso de quando for tentado a deslocar uma quantidade superior a capacidade do tamanho. Por exemplo, o que aconteceria se você tentar deslocar 35 bits em uma variavel do tipo int que comporta 32 ? Ou até mesmo 9 em uma variável byte ? Se isso acontecer o compilador fará uma cálculo nuclear para descobrir como deslocar:
+
+int x = 90 >> 35;
+
+Veja que no exemplo anterior, há um tentativa de deslocar 35 bits em um tipo int ! O compilador fará uma divisão entre a 35 quantidade de bits a deslocar e 32 que é a capacitade do tipo em questão e o resto dessa divisão será a quantidade deslocada, nesse caso: 3 !!
+
+byte y = (byte) 8 >> 12;
+
+12 % 8 = 4 (quatro bits a deslocar)
+
+Isso nos levanta um caso particular. E se for um múltiplo de 8 (no caso do tipo byte), por exemplo, tente deslocar 16 ou 32 em um tipo byte, quantos bits serão deslocados ? Exatamente nenhum pois o resto da divisão será 0 (nenhum bit) será deslocado. Portanto nem sempre o deslocamento de bits com o operador ( >>> ) será positivo, ou seja, tente deslocar 32 bits ou 64 bits em um tipo int que armazena o valor -300 e terá o mesmo valor -300 !! Talvéz você não esteje lembrado, mas um número se diz múltiplo de outro se o resto entre sua divisão for 0, veja o exemplo:
+
+64 é multiplo de 32 pois, 64 / 32 = 2 e resta 0
+32 é múltiplo de 32 pois, 32 / 32 = 1 e resta 0 (evidentemente)
+
+Não se irrite, foi só pra relembrar!!!
+
+Portanto nem sempre o deslocamento com o operador ( >>> ) resulta em um número positivo !!!
+
+3.3 - Atribuição de Objetos
+
+1) Dado as classes:
+
+class Carro {
+   public double preco = 0;
+}
+
+class Audi extends Carro { }
+
+1. public class Teste {
+2.  public static void main(String[] args) {
+3.      Carro a = new Carro();
+4.      Audi b = new Audi();
+5.      Carro c = new Audi();
+6.      Audi d = new Carro();
+7.  }
+8. }
+
+
+Qual das linhas anteriores estão incorretas e não permitiriam que o programa fosse compilado ?
+
+a) 1, 3
+b) 2, 3
+c) 5
+d) 6
+e) o código será compilado
+
+Não se esqueça da regra: X é membro de Y ??
+
+3.4 - Passagem de Parâmetro em Java é por Valor
+
+Muito discussão existe quando o assunto é a forma como a Java passa um variável (primitiva ou referência) para um método, mas acalme-se estamos aqui para descomplicar sua vida e lhe dar um nova oportunidade!!
+Quando uma variável é passada para um método, SEMPRE SEMPRE E SEMPRE será passado um cópia dos seus bits!!
+
+3.4.1 - Variável Primitiva
+
+public class Teste {
+        public static void main(String[] args) {
+            byte x = 10;
+            System.out.println("X antes: "+x);
+            altera(x);
+            System.out.println("X depois: "+x);
+        }
+            public static void altera(byte a) {
+            a = 2;
+    }
+}
+
+
+No caso anterior o que é passado para o método altera é: 00001010 que nada mais é que o valor decimal 10, porém observe que no escopo do método altera o valor recebido é alterado e quando o fluxo retorna ao método main o valor da variável x está intacta. Isso é fácil de entender, você deve pensar errôneamente que se o método alterar modificasse o valor de x, então x teria sido passado como referência ! Essa forma não é correta de se pensar, pense simplesmente que o método altera recebeu um cópia dos bits da variavel x que era: 00001010.
+
+Portanto o resultado do código acima é:
+
+X antes: 10
+X depois: 10
+
+3.4.2 - Variável Referência
+
+Agora o bicho pega!
+Uma variável de referência nada mais é que um repositório de bits que representam um forma de se acessar um objeto na memória. A variável é uma coisa o objeto que está na memória é outra, tente colocar isso na sua cabeça!
+
+public class Teste {
+    public static void main(String[] args) {
+        Carro c = new Carro();
+        c.preco = 13990.00;
+        System.out.println("preço antes: "+c.preco);
+        anula(c);
+        System.out.println("preço depois: "+c.preco);
+    }
+    public static void anula(Carro p) {
+        p = null;
+    }
+}
+
+
+Resultado:
+preço antes: 13990.0
+preço depois: 13990.0
+
+No trecho de código anterior acontece um fenômeno muito interessante e que nos dá a idéia de como funciona toda essa parafernalha:
+
+Premissas:
+- c é um variável de referência a um objeto do tipo Carro
+- o método anula, recebe uma variável p do tipo Carro
+- o método anula, diz para a variável p não referenciar nada (null)
+- se a variável c fosse passada como referência, quando o fluxo retornasse ao método main, c estaria referenciando null
+- se houver uma alteração do objeto que a variável p está referenciando, essa alteração também será visível à variável c (quando o fluxo retornar é claro) veja o trecho a seguir:
+
+public class Teste {
+    public static void main(String[] args) {
+        Carro c = new Carro();
+        c.preco = 13990.00;
+        System.out.println("preço antes: "+c.preco);
+        aumento(c);
+        System.out.println("preço depois: "+c.preco);
+    }
+        public static void aumento(Carro p) {
+        p.preco *= 1.05;
+    }
+}
+
+
+Resultado:
+preço antes: 13990.0
+preço depois: 14689.5
+
+Talvéz você esteja se perguntando porque é então que o valor foi alterado se em Java um variável é passada como valor ???? ERRADO, o que é passado como valor são os bits que referenciam o objeto, portanto p no método aumento referencia exatamente o mesmo objeto que c referencia no método main, ou você acha que a Java sai criando objetos na memória assim sem mais nem menos ?
+
+3.5 Operadores Bit a Bit
+
+Existem três operadores bit a bit:
+
+&	e
+
+|	ou inclusivo
+
+^ u exclusivo
+
+3.5.1 - Aplicando o operador &
+
+O operador & compara dois bits e será um se ambos o forem ! Calma que voce verá um exemplo :
+
+int x = 10 & 9;
+
+Conventendo para bits os números 10 e nove temos:
+
+1010
+1001
+------
+1000
+
+O Resultado em decimal é 8 !
+
+3.5.2 - Aplicando o operador | ou inclusivo
+
+int x = 10 | 9;
+
+1010
+1001
+------
+1011
+
+Resultado: 11
+
+3.5.3 - Aplicando o operador ^ ou exclusivo
+
+int x = 10 ^ 9;
+
+1010
+1001
+------
+0011
+
+Resultado: 3
+
+3.6 - Operador Bit Complementar
+
+Esse operador é unário, ou seja, envolve somente uma variável e deve ser usada quando se deseja inverter todos os bits de um número use o operador ( ~ )
+
+int x = 8;	// 1000
+x = ~x;	 // Passa a valer 0111
+
+
+3.7 - Operador Condicional
+
+O operador condicional é um operador ternário, ou seja, três operandos (óbvio) e deve ser usado quando se necessita realizar uma condição em uma única linha. Veja o código abaixo:
+
+int tamanho = 19;
+String texto = (tamanho>=10)?"Maior ou igual a 10":"Menor que 10";
+System.out.println(texto);
+
+Não precisa nem perguntar o que vai sair na tela que todos já sabem !!!
+Mas para os que ainda ficaram em dúvida, lá vai: o primeiro operando é a condição, ou seja, se ela for verdadeira (true) atribui o valor da segunda à variavel texto em sendo falsa (false) atribui o valor da terceira! Mais um exemplo:
+
+class Teste {
+    public static void main(String[] args) {
+        int x = 10 ^ 8;
+        int y = ~x;
+        System.out.println(( x > y )?"x é maior que y":"x é menor que y");
+    }
+}
+
+
+Não tente fazer algo do tipo:
+
+( x > y )?System.out.println("x é maior que y"): System.out.println("x é menor que y");
+
+Um operador condicional só pode ser usado para atribuir valores, ou seja, para ser usado quando se necessite fazer uma atribuição condicional....
+
+Mas algo assim é perfeitamente possível:
+
+2) Dado o código a seguir, o que acontecerá ?
+
+public class Teste {
+    public static void main(String[] args) {
+        int x = 10 ^ 8;
+        int y = ~x;
+        if ( ((x>y)?x:y) > 10 ) {
+            System.out.println("x é maior que b e é maior que 10");
+        } else {
+            System.out.println("x é maior que b mas não é maior que 10");
+        }
+    }
+}
+
+
+a) imprimirá " x é maior que b e é maior que 10"
+b) imprimirá "x é maior que b mas não é maior que 10"
+c) Não imprimirá nenhum resultado
+d) Erro de compilação
+e) Uma exceção será lançada
+
+Resposta no final do capítulo !!!
+
+3.8 - Operador instanceof
+
+Operador binário (dois operandos) que é utilizado para saber se um objeto é instância de uma classe.
+
+String nome = "kuesley";
+if (nome instanceof String) {
+        System.out.println("nome é do tipo String");
+    } else {
+        System.out.println("nome não é do tipo String");
+    }
+
+Você também poderá compara subclasse veja o exemplo a seguir:
+
+public class Veiculo { }
+
+public class Audi extends Veiculo { }
+
+public class Teste {
+    public static void main(String[] args) {
+        Audi a = new Audi();
+        Veiculo v = new Veiculo();
+        if (a instanceof Audi) System.out.println("a é do tipo Audi");
+        if (v instanceof Veiculo) System.out.println("v é do tipo Veiculo");
+        if (v instanceof Audi) System.out.println("v é do tipo Audi");
+        if (a instanceof Veiculo) System.out.println("a é do tipo Veículo");
+    }
+}
+
+
+Nesse código será exibido:
+
+a é do tipo Audi	 // a que é instância da classe Audi é membro de Audi (isso é óbvio)
+v é do tipo Veiculo	 // v que é instância da classe Veiculo é membro de Veiculo (óbvio)
+a é do tipo Veiculo	 // a que é uma instância da classe Audi é membro de veículo, pois a classe Audi é uma sub-classe de Veiculo!
+
+Isso porque aplica-se sempre aquela regra: x É MEMBRO y ???
+
+Esse operador também pode ser aplicado as interfaces, ou seja, uma classe é membro de uma interface sempre que ela a implementa.
+
+public interface Acao { }
+public class Veiculo implements Acao { }
+public class Audi extends Veiculo { }
+public class Moto { }
+
+public class Teste {
+    public static void main(String[] args) {
+        Audi a = new Audi();
+        Veiculo v = new Veiculo();
+        Moto m = new Moto();
+        if (a instanceof Acao) System.out.println("a é membro de Acao");
+        if (v instanceof Acao) System.out.println("v é membro de Acao");
+        if (m instanceof Acao) System.out.println("m é membro de Acao");
+    }
+}
+
+
+Resultado do código anterior:
+
+a é membro de Acao
+v é membro de Acao
+
+Lembra-se do primeiro capítulo quando estudamos os arrays, e foi dito que um array é um objeto, agora comprovaremos essa afirmação para que não fique dúvida em sua cabeça.
+
+public class Teste {
+    public static void main(String[] args) {
+        boolean c = (new int[] { 1,2,3 } instanceof Object);
+        System.out.println(c);
+    }
+}
+
+
+O resultado será true.
+Foi criado um array anônimo (estudado no capítulo 1) e verificado se é um tipo Object e atribui-se a variável c o resultado true
+
+Importante: Você poderá se deparar com questões que abordam se um objeto é de um tipo de classe que esteja fora da hierarquia, por exemplo:
+
+class Veiculo { }
+class Audi extends Veiculo { }
+
+public class Teste {
+    public static void main(String[] args) {
+        Audi a = new Audi();
+        Veiculo v = new Veiculo();
+        boolean b1 = (a instanceof Audi);   // ok - b1  é true
+        boolean b2 = (a instanceof Veiculo);   // ok - b2  é true
+        boolean b3 = (v instanceof Audi);   // ok - b3 é false
+        boolean b4 = (a instanceof String);   // erro de compilação
+    }
+}
+
+
+3.9 - Sombreando variáveis
+
+Uma área interessante da Java é a forma como trata os sobreamentos de variáveis. Talvez você esteja se perguntando "o que é sobrear uma variável ???", pense em uma classe com um membro inteiro chamado tamanho, imagine ainda que você crie um método e internamente você também crie um variável local chamada tamanho, o que acontecerá ? A classe pirará ? Não a Java é esperta e sabe tratar isso, veja como:
+
+public class Teste {
+    static int tamanho = 0;
+    public static void main(String[] args) {
+        tamanho = 9;
+        System.out.println("Antes: "+tamanho);
+        crescer(2);
+        System.out.println("Depois: "+tamanho);
+    }
+    public static void crescer(int tamanho) {
+        tamanho = tamanho + 1;
+    }
+}
+
+
+O resultado do código anterior será:
+
+Antes: 9
+Depois: 9
+
+A variável tamanho dentro do escopo do método que está sendo usada, não é a mesma declarada como membro da classe, agora se alterarmos um pouco o código como segue teremos um resultado diferente:
+
+public class Teste {
+int tamanho = 0;
+    public static void main(String[] args) {
+        Teste t = new Teste();
+        t.tamanho = 9;
+        System.out.println("Antes: "+t.tamanho);
+        t.crescer(2);
+        System.out.println("Depois: "+t.tamanho);
+    }
+    public void crescer(int tamanho) {
+        this.tamanho = tamanho + 1;
+    }
+}
+
+
+O resultado será:
+
+Antes: 9
+Depois: 3
+
+OBS: VOCÊ NÃO PODE SIMPLESMENTE COLOCAR A PALAVRINHA this no método crescer, porque uma variável static nunca poderá ser referenciado por um contexto não-estático, e a palavra this quer dizer que é de um objeto !!!
+
+O mesmo comportamento tem os objetos, mas preste bastante atenção pois estive conversando com o pessoal da Sun e eles me falaram que para a sua prova eles vão caprichar em questões que tratar esse assunto.
+
+3.10 - Operadores matemáticos
+
+Não precisa falar muito sobre esse operadores, pois sei que você é bom em matemática e apesar de ter errados algumas respostas quando a professora da 4ª série lhe perguntava.
+Uma observação que é importante ser ressaltada é que toda operação envolvendo números inteiros resultarão em um tipo int, mesmo sendo byte * short, ou byte / int. Como você sabe não é possível realizar divisão por zero para números inteiros, mas em número de pontos flutuantes isso é possível podendo retornar um 0 positivo ou um 0 negativo.
+
+Os operadores são:
+
+Unários: -- ++
+Binários: + - / * %
+
+int x = 10 + 10;
+int y = 10 / 0;	// Uma exceção será lançada ! java.lang.ArithmeticException
+
+3.10.1 - Divisão por zero
+
+Veja o código a seguir:
+
+public class Teste {
+    public static void main(String[] args) {
+        double sal = 140 / 0;
+        System.out.println("Salario: "+sal);
+    }
+}
+
+
+O resultado será uma exceção java.lang.ArithmeticException
+Pois observe que 140 é um inteiro e não um double, por isso a exceção. Agora observe o código a seguir:
+
+public class Teste {
+    public static void main(String[] args) {
+        double sal = -140.0 / 0;
+        System.out.println("Salario: "+sal);
+    }
+}
+
+
+Resultado: Salario: -infinity (isso mesmo infinito negativo)
+
+Olhe o comportamento estranho da Java quando os dois operadores forem zero
+
+public class Teste {
+    public static void main(String[] args) {
+        double sal = -0.0 / 0;
+        System.out.println("Salario: "+sal);
+    }
+}
+
+
+Resultado: Salario: NaN (atenha-se a saber o que resulta e não o porquê)
+
+
+3.10.2 - Incremento e Decremento
+
+Os operados unários incremento e decremento são bastante utilizados e devem ser aprendidos para a obtenção da tão sonhada certificação, veja como funciona:
+
+Operador pré-fixado
+
+int x = 10;
+System.out.println("x é "+(++x));
+
+Não tente fazer em casa esse trecho sem os parenteses " System.out.println("x é "+++x);" o compilador pira !!!
+É o equivalente a dizer: "Por favor, incremente 1 a variável x depois exiba o valor da variável, continue o seu trabalho"
+
+O resultado será: x é 11
+
+Operador pós-fixado
+
+int x = 9;
+System.out.println("x vale: "+x--);
+System.out.println("o valor final de x é "+x);
+
+O resultado será:
+
+x vale: 9
+o valor final de x é 8

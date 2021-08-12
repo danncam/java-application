@@ -1,0 +1,361 @@
+package AdressBook;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.Arrays;
+
+/**
+ *
+ * @author dan
+ */
+public class Book {
+
+    private static Scanner in = new Scanner(System.in);
+    private static Friend[] book = new Friend[10];
+    private static byte count = 0;
+    private static int id = 1;
+    private static File file = new File("Book.adbk");
+    public final static String split = "%";
+
+    public static void main(String[] args) throws FileNotFoundException, IOException {
+        int option;
+        while (true) {
+            menu();
+            option = in.nextInt();
+            switch (option) {
+                case 1:
+                    /* Adiciona caso o contador seja menor que o limite do vetor */
+                    if (count >= book.length) {
+                        messages(1);
+                    } else {
+                        Friend newFriend = newFriend();
+                        if (newFriend != null) {
+                            book[count] = newFriend;
+                            count++;
+                            sortBy();
+                        }
+                        messages(6);
+                    }
+                    break;
+                case 2:
+                    /* pesquisa de acordo com o critério */
+                    Friend found = book[searchFriend()];
+                    if (found != null) {
+                        showFriend(found);
+                    } else {
+                        messages(2);
+                    }
+                    break;
+                case 3:
+                    /* invalida o contato na agenda, podendo ser sobrescrito posteriormente */
+                    if (count < 1) {
+                        messages(3);
+                    } else {
+                        int index = searchFriend();
+                        if (index <= 0) {
+                            delFriend(book[index]);
+                        } else {
+                            messages(2);
+                        }
+                    }
+                    break;
+
+                case 4:
+                    /* Escreve os dados do vetor em um arquivo */
+                    write();
+                    messages(12);
+                    break;
+                case 5:
+                    /* Carrega os dados de um arquivo */
+                    load();
+                    break;
+                case 6:
+                    /* InsertionSort dos contatos */
+                    sortBy();
+                    break;
+                case 7:
+                    /* Todos os dados são invalidados */
+                    eraseAllData();
+                    break;
+                case 8:
+                    /* Bye \õ_ */
+                    exit();
+                case 9:
+                    showAllData();
+            }
+        }
+    }
+
+    private static void menu() {
+        System.out.println("MENU:\n\n"
+                + "1- Adicionar Contato\n"
+                + "2- Buscar Contato\n"
+                + "3- Remover Contato\n"
+                + "4- Salvar Agenda\n"
+                + "5- Abrir Agenda\n"
+                + "6- Ordenar Agenda\n"
+                + "7- Apagar Agenda\n"
+                + "8- Sair");
+    }
+
+    private static Friend newFriend() {
+        String name, address, email, phone;
+        System.out.println("Adicionando contato");
+        System.out.print("-Nome: ");
+        name = in.next() + in.nextLine();
+        System.out.print("-Endereço: ");
+        address = in.next() + in.nextLine();
+        System.out.print("-Email: ");
+        email = in.next();
+        System.out.print("-Telefone: ");
+        phone = in.next();
+        Friend friend = new Friend(name, address, email, phone);
+        friend.setID(id);
+        id++;
+        return friend;
+    }
+
+    private static void delFriend(Friend a) {
+        char option = 0;
+        messages(9);
+        showFriend(a);
+        try {
+            option = (char) System.in.read();
+        } catch (IOException ex) {
+            Logger.getLogger(Book.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if ((option == 'y') || (option == 'y')) {
+            a.setID(0);
+            count--;
+            messages(7);
+        }
+        if ((option == 'n') || (option == 'N')) {
+            messages(8);
+        }
+    }
+
+    private static int searchFriend() {
+        int option;
+        String searchFor;
+        System.out.println("Procurar contato por:\n"
+                + "1- nome\n"
+                + "2- endereço\n"
+                + "3- email\n"
+                + "4- telefone\n");
+
+        option = in.nextInt();
+        if (option < 5 && option > 0) {
+            System.out.print("Insira os dados: ");
+            searchFor = in.next() + in.nextLine();
+            for (int i = 0; i < book.length; i++) {
+
+                switch (option) {
+                    case 1:
+                        
+                        if (book[i].exist() && book[i].data[0].equalsIgnoreCase(searchFor)) {
+                            return i;
+                        }
+
+                    case 2:
+
+                        if (book[i].exist() && book[i].data[1].equalsIgnoreCase(searchFor)) {
+                            return i;
+                        }
+                        break;
+
+                    case 3:
+
+                        if (book[i].exist() && book[i].data[2].equalsIgnoreCase(searchFor)) {
+                            return i;
+                        }
+                        break;
+
+                    case 4:
+
+                        if (book[i].exist() && book[i].data[3].equalsIgnoreCase(searchFor)) {
+                            return i;
+                        }
+                        break;
+                }
+            }
+        } else {
+            messages(5);
+            searchFriend();
+        }
+
+        return -1;
+    }
+
+    private static void showFriend(Friend a) {
+        System.out.println("\nNome: " + capitalizeWords(a.data[0])
+                + "\nEndereço: " + capitalizeWords(a.data[1])
+                + "\nEmail: " + a.data[2].toLowerCase()
+                + "\nTelefone: " + a.data[3]);
+    }
+
+    private static void eraseAllData() {
+        messages(10);
+        char option = 0;
+        try {
+            option = (char) System.in.read();
+
+
+        } catch (IOException ex) {
+            Logger.getLogger(Book.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        if ((option == 'y') || (option == 'y')) {
+            for (int i = 0; i < book.length; i++) {
+                book[i] = null;
+                messages(11);
+            }
+            if ((option == 'n') || (option == 'N')) {
+                messages(8);
+            }
+        }
+    }
+
+    private static void messages(int m) {
+        switch (m) {
+            case 1:
+                System.out.println("Impossível adicionar. Exclua algum contato");
+                break;
+            case 2:
+                System.out.println("CONTATO NÃO ENCONTRADO");
+                break;
+            case 3:
+                System.out.println("NÃO HÁ CONTATOS A SEREM DELETADOS");
+                break;
+            case 4:
+                System.out.println("Há caracteres Inválidos");
+                break;
+            case 5:
+                System.out.println("Opção inválida");
+                break;
+            case 6:
+                System.out.println("Adicionado");
+                break;
+            case 7:
+                System.out.println("Removido");
+                break;
+            case 8:
+                System.out.println("Permanece intacto(a)");
+                break;
+            case 9:
+                System.out.println("TEM CERTEZA QUE DESEJA EXCLUIR ESTE CONTATO? (Y/N)");
+                break;
+            case 10:
+                System.out.println("ESTA OPERAÇÃO IRÁ APAGAR TODA A AGENDA PERMANENTEMENTE. DESEJA CONTINUAR? (Y/N)");
+                break;
+            case 11:
+                System.out.println("AGENDA APAGADA COMPLETAMENTE");
+                break;
+            case 12:
+                System.out.println("ESCRITA BEM SUCEDIDA");
+                break;
+            case 13:
+                System.out.println("AGENDA CARREGADA COM SUCESSO");
+                break;
+        }
+    }
+
+    private static void showAllData() {
+        for (int i = 0; i < book.length; i++) {
+            Friend f = book[i];
+            if (f != null) {
+                System.out.print("[" + i + "]\t" + f.getID() + "\t" + f.data[0] + "\t" + f.data[2] + "\t" + f.data[1] + "\t" + f.data[3] + "\n");
+            }
+        }
+    }
+
+    private static void write() {
+        try {
+            FileWriter fstream = new FileWriter(file);
+            BufferedWriter out = new BufferedWriter(fstream);
+            for (Friend f : book) {
+                if (f != null) {
+                    out.write(f.toLine());
+                    out.newLine();
+                }
+            }
+            out.close();
+
+
+        } catch (IOException ex) {
+            Logger.getLogger(Book.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.print(
+                    "ERROR: " + ex.getMessage());
+        }
+    }
+
+    private static void load() {
+        try {
+            Scanner reader = new Scanner(file);
+            int loop = 0;
+            String d[] = reader.nextLine().split(split);
+            for(int i = 0; i < d.length; i++) {
+                book[loop++] = new Friend(d[1], d[2], d[3], d[4]);
+                
+            }
+            reader.close();
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Book.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    private static void sortBy() {
+
+        int i, j;
+        Friend newValue;
+        for (i = 1; i < book.length; i++) {
+            newValue = book[i];
+            j = i;
+            while (newValue != null && j > 0 && book[j - 1].data[0].charAt(0) > newValue.data[0].charAt(0)) {
+                book[j] = book[j - 1];
+                j--;
+            }
+            book[j] = newValue;
+        }
+    }
+
+    private static String capitalizeWords(String str) {
+        if (str == null) {
+            throw new ArrayIndexOutOfBoundsException(str);
+        }
+        if (str.length() == 0) {
+            return str;
+        }
+
+        StringBuilder sb = new StringBuilder(str.length());
+        // Upper the first char.
+        sb.append(Character.toUpperCase(str.charAt(0)));
+        for (int i = 1; i < str.length(); i++) {
+            // Get the current char.
+            char c = str.charAt(i);
+
+            // Upper if after a space.
+            if (Character.isWhitespace(str.charAt(i - 1))) {
+                c = Character.toUpperCase(c);
+            } else {
+                c = Character.toLowerCase(c);
+            }
+
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+
+    private static void exit() {
+        System.out.println("Bye :)");
+        System.exit(0);
+    }
+}

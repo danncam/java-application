@@ -1,0 +1,662 @@
+Capítulo 7 - Objetos e conjuntos
+
+7.1 - o método equals
+
+Esse método é definido na classe Object, portanto toda classe o terá por herança. Sua assinatura é:
+
+public boolean equals(Object o)
+
+Qualquer tentativa de substituição desse método escrita de forma diferente, não será evidentemente uma substituição e sim uma sobrecarga de método. Você deve prestar bastante atenção nesses conceitos que agora serão explicados, pois são fundamentais para absorção e compreensão desse capítulo. Você já deve saber que o método equals pode funcionar de forma diferente em cada classe, e isso vai depender de como ele foi definido, por exemplo, nas classes Wrappers, é possível saber se um valor 5 inteiro que está armazenado em um objeto x é igual a um objeto y que também armazena o valor 5 (desde que sejam da mesma classe como Integer), isso devido ao fato de que o método equals foi substituído nas classes Wrappers, fazendo com que retorne true quando o valor armazenado pelas classes Wrappers forem idênticos, a exceção é claro, se o tipo for diferente. Vejamos:
+
+Integer i = new Integer("5");
+Long l = new Long("5");
+if ( i.equals(l)) System.out.println("igual");
+else System.out.println("diferente");
+
+
+// Resultado: diferente
+
+Agora quando comparamos instâncias distintos de duas classes iguais:
+
+Integer i = new Integer("5");
+Integer j = new Integer("5");
+if ( i.equals(l)) System.out.println("igual");
+else System.out.println("diferente");
+
+
+// Resultado: igual
+
+Apesar de serem objetos distintos, tem o mesmo valor.
+
+Se usarmos o operador ==
+
+Integer i = new Integer("5");
+Integer j = new Integer("5");
+if (i == j) System.out.println("igual");
+else System.out.println("diferente");
+
+
+// Resultado: diferente
+
+Apesar dos valores serem identicos, o resultado do teste (==) é falso, pois esse testa se os objetos apontam para o mesmo objeto na memória.
+
+Quando substituir o método equals ?
+
+Para iniciarmos essa discussão, precisamos saber que o método equals na classe Object funciona da mesma forma como o operador ==, portanto quando não substituímos o método equals em uma classe o retorno só será true quando ambos objetos apontarem para o mesmo objeto na memória, vejamos:
+
+class Flamengo {
+public static void main(String[] args) {
+Flamengo penta = new Flamengo();
+Flamengo melhor = new Flamengo();
+Flamengo temp = penta;
+int i = 0;
+if (penta.equals(melhor)) ++i;
+if (melhor.equals(penta)) ++i;
+if (temp.equals(penta)) ++i;
+if (temp.equals(melhor)) ++i;
+System.out.print(i);
+}
+}
+
+
+// Resultado: 1
+
+Note que somente uma vez a condição é satisfeita, no caso em que temp == penta !
+
+Como a Java lhe dá os poderes do mundo, você pode alterar esse comportamento. Como ? Mudando a JVM ? Não ! É só substituir o método equals na classe (tira o calçado para falar esse nome) Flamengo, mas para isso é preciso saber quando e porque mudar o método equals !
+Essa é uma decisão que deve ser tomada medindo todas as consequências. Você deve primeiro responder uma pergunta básica para saber se precisará ou não mudar o método equals. Pergunte se é preciso em alguma situação identificar dois objetos distintos como iguais. Ficou confuso, calma, calma ! Voce tem dois objetos A e B, e adiciona os mesmos em um conjunto (estudaremos conjuntos mas afrente) agora você precisa realizar uma pesquisa afim de saber se o objeto C está no conjunto - pressuponha que os atributos de C e B são semelhantes, se o métodos equals da classe dos objetos citados não for modificado, você nunca obterá true na condição B.equals(C), mesmo sendo classes iguais por sua semântica.
+Então a decisão de mudar o método equals de uma classe está intimamente relacionada com a necessidade de em uma pesquisa se saber se um objeto está na lista pesquisa ou não.
+
+
+Entendendo o uso de hashCode
+
+Outro conceito que precisamos entender agora é, onde a utilização do código hash influência no uso de conjuntos ? Não se preocupe, apesar de parecer estranho é um conceito fácil de se entender.
+Vamos imaginar uma sala com inúmeras caixas postais, o PAULO tem uma caixa com número 385, a ANA tem uma com o número 208, PEDRO usa a de número 378 e assim por diante. Toda vez que chega uma correpondência (do PAULO por exemplo), sabe-se qual o número da caixa postal atravéz de um cálculo em função do seu nome, por exemplo, a soma dos códigos ASCII como podemos observar a seguir:
+
+P	-> 80
+A	-> 65
+U	-> 85
+L	-> 76
+O	-> 79
+
+HASH -> 385
+
+Não tire sarro desse cálculo, esse exemplo de código hash é apropriado porém ineficiente (a quem diga absurdo) e isso veremos mais tarde. Com esse cálculo foi possível obter o número da caixa postal do PAULO. Agora vamos analisar como ficaria a pesquisa, ou seja, quando o PAULO chegar na empresa de correspondência e quiser saber se existe alguma correspondência para ele, o atendente perguntaria seu nome e faria o mesmo cálculo para descobrir qual o número da caixa postal, obtendo o número 297, assim o atendente se reportaria à cx no. 297 e recuperaria todas as suas correspondências. Esse processo é muito indicado quando se deseja extrema velocidade no processo de pesquisa. Se você é um cara esperto já deve ter notado um "erro" em nosso algoritmo de cálculo do código hash, pois seguindo esse cálculo qual seria o número da caixa postal para a IVONE. aha com certeza o PAULO pegaria as correspondências da IVONE e vice-versa ! NÃO ! Não pense assim, o processo de pesquisa usando código hash é um processo em duas fases, a primeira é saber em qual depósito se encontra as informações, ou seja, em qual caixa postal está as correspondências, a segunda é verificar cada item da caixa postal comparando para saber se é um item da pessoa desejada. O que não pode acontecer é criar um algoritmo que coloque todas as correspondências em um ou dois depósitos (caixa postal) assim o seu processo de pesquisa ficaria ineficiente, ruim, ridículo, absurdo! Mas correto ! MAS LENTO !
+Talvez o exemplo de correpondência não foi muito convincente, visto que uma caixa postal é um depósito de correpondências de uma única pessoa, mas como a empresa de correpondêcia é nossa, e os clientes não tem chave, convencionamos dessa forma - só quem pega as correpondências é um funcionário da empresa.
+Imagine que nosso algoritmo fosse contar as letras do nome para saber o número da caixa postal, a seguinte lista mostraria a bagunça que ficaria:
+
+NOME	 DEPOSITO (CP)
+
+JOAO	 4
+ANA	 3
+PEDRO	 5
+AMY	 3
+MARIA	 5
+JOSE	 4
+ENIO	 4
+JOAQUIM	7
+CAIO	 4
+
+Note que cada nome com 4 (quatro) dígitos o número da caixa postal será o mesmo, ficaria uma bagunça, o processo de busca seria muito lento, portanto, quando for criar um algoritmo de cálculo para código hash (espalhamento), faça-o de forma inteligente, usando números complexos, matrizes, limites, derivadas e funções !!! Só para termos uma idéia, cálulos de hash dão assunto para teses de doutorado (isso eh li no livro) !
+
+
+Método equals versus hashCode
+
+Você já deve ter notado a relação entre os métodos equals e hashCode, pois em uma pesquisa, você precisará verificar na segunda fase se um objeto X é igual a um item do conjunto - que nada mais é que um objeto Y. Se você não substituir o métodos equals você não terá essa possibilidade, visto que o método equals da classe Object retorna true se ambos os objetos apontarem (ops! isso não é C) referenciarem o mesmo objeto na memória. Memorize isso: para se utilizar uma classe em um conjunto, ela deve ter o método equals substituído.
+
+Contratos do método equals
+
+1) Reflexivo - Para qualquer valor, x.equals() sempre será true;
+
+2) Simétrico - Para qualquer valor de x e y, x.equals(y) é true, se e somente se y.equals(x) tambem for.
+
+3) Transitivo - Para qualquer valor de x, y e z, se x.equals(y) for verdadeiro e y.equals(z) tambem for, então x.equals(z) tambem será verdadeiro.
+
+4) Consistente - Todas as chamadas para x.equals(y) retornará consistentemente true ou false, até que haja uma mudança em algum dos objetos, caso contrário o resultado será sempre o mesmo.
+
+5) Se x referenciar algum objeto, então x.equals(null) deverá retornar falso. Obviamente que uma tentativa de chamar um método equals para um objeto null, lancará um exceção.
+
+
+Contrato do método hashCode
+
+1) Sempre que um método hashCode for chamado, ele deverá resultar no mesmo código hash consistentemente (caso nenhum valor usado nas comparações for alterado).
+
+2) Se dois objetos forem iguais, considerados pela chamada ao métodos equals, portanto o código hash deverá ser o mesmo para ambos os objetos.
+
+3) Não é obrigado que dado dois objetos distintos, tenham códigos hash distintos.
+
+4) Não é aconselhável usar atributos transient´s no cálculo do código hash, visto que após o processo de deserialização, o método equals poder produzir um resultado diferente de quando o objeto foi serializado, portanto é uma situação perigosa.
+
+Esse contratos devem ser respeitados pois você poderá alterar (substituir) o método equals, portanto siga sempre essas leis.
+
+Substituindo os métodos equals e hashCode
+
+public class Pessoa {
+
+private String CPF;
+
+public int hashCode() {
+   return 5;
+}
+
+public boolean equals(Object o) {
+   if (o instanceof Pessoa) || (o.CPF == this.CPF) return true;
+         else return false;
+}
+
+}
+
+
+7.2 - Coleção de Dados
+
+O uso de coleção de dados é uma necessidade quando precisamos de trabalhar com dados. Já vimos como comparar objetos afim de saber se são equivalentes ou não, agora vamos entender seus repositórios e como funcionam.
+Existem classes e interfaces que precisaremos entender, se listassêmos aqui, já ficaria muito nebuloso, por isso vamos por parte. Podemos dividor os conjuntos em três categorias:
+
+Listas
+Conjuntos
+Mapas
+
+Vejamos a hierarquia dessas classes/interfaces:
+
+
+
+7.2.1 - Ordem e classificação
+
+Nesse primeiro instante, precisamos entender dois conceitos fundamentais nas coleções, que são: ordem e classificação de conjuntos. Abaixo podemos vislumbrar uma definição completa desses conceitos:
+
+ordenada - Uma classe é ordenada se pode ser iterada pelos seus elementos em uma ordem específica, através de um índice ou por exemplo pela ordem de inserção.
+
+classificada - Uma classe classificada, quando seus elementos estão classificados por algum critério, como por exemplo, em ordem alfabética, crescente ou cronológica etc. Toda classe classificada é ordenada, já uma classe ordenada pode não ser classificada.
+
+7.2.2 - List
+
+As classes que implementam a interface List, relevam o índice, com isso podemos inserir um item no meio de uma lista. Como você já deve ter percebido, as classes que implementam a interface List são ordenadas por meio de um índice, isso permite o acesso a um elemento que se encontra no meio da lista, através de seu índice. É uma espécie de sequência para armazenamento de objetos.
+
+ArrayList - É um estrutura de dados que tem com base um array. É isso mesmo! Um ArrayList nada mais é que um array que pode ser alterado. Sua estrutura interna (pode conferir) é baseada em um Array com um tamanho inicial e deve ser especificado na criação do objeto - se nenhum valor for especificado a classe assumirá 10 (sei lá porquê). Com isso é possível tem uma ordem em ArrayList, pois o índice é o identifica os elementos. Vejamos suas principais características:
+
+- Acesso sequencial / aleatório extremamente rápido.
+
+- Em função do índice o acesso a um elemento no meio da lista é uma operação extremamente rápida, como já sabemos é o mesmo que recuperar um item de um vetor.
+
+- Inserção é também extremamente rápida
+
+- Vale uma ressalva nessa situação, visto que uma ArrayList cresce a medida que os itens vão sendo inseridos:
+
+Exemplo:
+
+import java.util.*;
+
+public class TestList {
+   public static void main(String[] args) {
+       long inicio, fim;
+       int n = 3000000;
+       inicio = System.currentTimeMillis();
+       ArrayList array = new ArrayList();
+       for (int i = 0; i < n; i++) {
+      array.add(new Integer(i));
+       }
+       fim = System.currentTimeMillis();
+       System.out.println( "Tempo inserir: " + (fim - inicio)/1000.000 );
+       inicio = System.currentTimeMillis();
+       Iterator o = array.iterator();
+       while (o.hasNext()) {
+      Integer x = (Integer)o.next();
+       }
+       fim = System.currentTimeMillis();
+       System.out.println( "Tempo iterar: " + (fim - inicio)/1000.000 );
+   }
+}
+
+
+Resultado do programa acima:
+
+Tempo inserir: 2.563
+Tempo iterar: 0.172
+
+Note que houve uma demora relativamente maior no processo de inserção, porém observe que foram inseridos três milhões de objetos que foram inseridos - acredito que o tempo consumido nos dois processos foi muito bem aproveitado pela classe.
+A classe ArrayList tem um construtor sobrecarregado que recebe um argumento onde pode-se definir a capacidade da estrutura, ou seja, se for especificado 1000, a classe irá reservar 1000 endereços nulos para o preenchimento dos dados, isso evita a realocação constante de seu array.
+
+Vector - Tem as mesmas características de ArrayList, porém seus métodos são sincronizados. Se aplicarmos o mesmo teste anterior notaremos uma diferença na inserção, vejamos:
+
+import java.util.*;
+
+public class TestVector {
+   public static void main(String[] args) {
+       long inicio, fim;
+       int n = 60000;
+       int j = 0;
+
+       inicio = System.currentTimeMillis();
+       Vector array = new Vector(0,1);
+       for (int i = 0; i < n; i++) {
+      array.add(new Integer(i));
+       }
+       fim = System.currentTimeMillis();
+       System.out.println( "Tempo inserir: " + (fim - inicio)/1000.000 );
+
+       inicio = System.currentTimeMillis();
+       Iterator o = array.iterator();
+       while (o.hasNext()) {
+      Integer x = (Integer)o.next();
+      j++;
+       }
+       fim = System.currentTimeMillis();
+       System.out.println( "Tempo iterar: " + (fim - inicio)/1000.000 );
+   }
+}
+
+
+
+Resultado do programa acima:
+
+Tempo inserir: 109.938
+Tempo iterar: 0.015
+
+Observe que o tempo de inserção foi extremamente superior ao de ArrayList mesmo com uma quantidade 50 vezes inferior, portanto a inserção usando a classe Vector é muito lenta, você provavelmente nunca precisará usá-la, visto que sua única diferença em relação à classe ArrayList é que seus métodos são sincronizados, e esse recurso você pode conseguir se utilizar métodos estáticos da classe java.util.Colletions.
+Só pra não ficar nenhuma dúvida, se o mesmo programa sobre a classe Vector fosse especificado 3 milhões com em ArrayList, seria necessário um tempo equivalente a 50 * 109.938 = 5496,9 s o que é equivalente a 91,615 minutos.
+
+LinkedList - A diferença entre LinkedList e ArrayList é que os elementos de LinkedList são duplamente encadeados entre si. Isso é essencial quando se deseja implementar uma fila ou pilha. Por causa da duplicidade de encadeamente, é possível por exemplo inserir no final da lista, no início sem a necessidade da realocação do array, visto que cada nó tem uma referência para seu sucessor e seu predecessor, logicamente que isso faz com que o processo de inserção seja um pouco mais lento, pois a cada objeto inserido é registrado o "endereço dos vizinhos" consequentemente uma lista duplamente encadeada é bem maior que uma lista simples, vejamos:
+
+import java.util.*;
+
+public class TestVector {
+   public static void main(String[] args) {
+       long inicio, fim, j;
+       j = 0;
+       inicio = System.currentTimeMillis();
+       LinkedList array = new LinkedList();
+       for (int i = 0; i < 1500000; i++) {
+      array.add(new Integer(i));
+       }
+       fim = System.currentTimeMillis();
+       System.out.println( "Tempo inserir: " + (fim - inicio)/1000.000 );
+       inicio = System.currentTimeMillis();
+       Iterator o = array.iterator();
+       while (o.hasNext()) {
+      Integer x = (Integer)o.next();
+      j++;
+       }
+       fim = System.currentTimeMillis();
+       System.out.println( "Tempo iterar: " + (fim - inicio)/1000.000 );
+
+   }
+}
+
+
+Resultado:
+
+Tempo inserir: 2.485
+Tempo iterar: 0.109
+
+Note que a metade dos itens do primeiro exemplo foi inserido e no entando o tempo gasto foi praticamente o dobro.
+
+Resumindo as listas - O que precisamos saber é que o índice em uma lista é relevante, toda lista é ordenada, ou seja, podemos iterar em uma ordem especifica, seja ela pela ordem de inserção ou pela ordem do índice. A não se esqueça que não existe lista classificada !
+
+7.2.3 - Set
+
+Voltemos a 5a. série do ensino médio:
+
+A = { 0, 1, 2 }
+B = ( 1, 2, 3 }
+A U B = { 0, 1, 2, 3 }
+
+Note que os elementos repetidos {1,2} foram suprimidos de um dos conjuntos para não haver repetição. Isso você já deveria saber, pois deve ter estudado no início do ensino médio. Bom o que precisamos saber agora é que toda classe que implementa a interface Set: NÃO ACEITA DUPLICATAS !!! Esse conceito é fundamental para entendermos as classes Set´s !
+
+Como tocamos em um assunto essencial, vejamos como a classe funciona:
+
+X -> Testa o método equals
+Y -> Pega o código hash
+
+Se X ou Y for falso o objeto é inserido.
+
+Vejamos um caso que sempre será inserido: Se o método equals não for substituído todos os elementos serão inseridos, a menos que você tente inserir o mesmo objeto duas vezes, vejamos:
+
+
+public class Test {
+   public static void main(String[] args) {
+      HashSet conjunto = new HashSet();
+      A x, y, z;
+      x = new A();
+      y = new A();
+      x.a = 10;
+      y.a = 20;
+      z = x;
+      conjunto.add(x);
+      conjunto.add(y);
+      conjunto.add(z);
+   }
+}
+
+class A {
+   int a = 0;
+}
+
+
+A pergunta é: Quantos objetos eu tenho nesse conjunto ??? Acertou se você respondeu dois, vamos tentar entender: note que só existem dois objetos distintos: x e y o z é uma referência a x, portanto, quando o método add foi chamado para o caso de z foi calculado o código hash (digamos que deu 7621), a segunda questão que a classe faz é saber se existe algum objeto no depósito 7621 que seja igual a z, como sabemos (já estudamos isso) que o código hash de dois objetos igual sempre será o mesmo, nesse caso x e z, podemos pressupor que o objeto x está também no depósito 7621, consequentemente o método equals deve (pelo menos é o que esperamos) retornar true, portanto o objeto z não será inserido no conjunto. Talvez você esteja rindo desse exemplo, mais vamos complicar um pouco:
+
+import java.util.*;
+
+public class Teste {
+    public static void main(String[] args) {
+      HashSet conjunto = new HashSet();
+      A x, y, z;
+      x = new A();
+      y = new A();
+      z = new A();
+      x.a = 10;
+      y.a = 20;
+      z.a = 10;
+      conjunto.add(x);
+      conjunto.add(y);
+      conjunto.add(z);
+    }
+}
+
+class A {
+   int a = 0;
+
+   public int hashCode() {
+       return 10;
+   }
+}
+
+
+Note que nesse caso, substituímos o método hashCode, apesar de ser uma substituição ridícula, ela funciona. Seguindo o mesmo raciocínio do exemplo anterior, quantos elementos foram inseridos ? Tentamos entender: cada vez que o método add é chamado, a classe HashSet chama o método hashCode para tentar encontrar um objeto equivalente, bom nesse caso, o hashCode está retornando 10, com isso podemos saber o endereço de um possível elemento já inserido, porém o método equals que prevalece nesse caso é o da classe Object (que você deve lembrar - retorna true se ambas as referências forem para os mesmos objetos) e o método equals nesse caso irá retornar false, com isso mesmo que se tenha a intenção de serem semelhantes os objetos x e z não o são, visto que para isso será necessário substituir tambem o método equals, vejamos no próximo exemplo:
+
+import java.util.*;
+
+public class Teste {
+    public static void main(String[] args) {
+      HashSet conjunto = new HashSet();
+      A x, y, z;
+      x = new A();
+      y = new A();
+      z = new A();
+      x.a = 10;
+      y.a = 20;
+      z.a = 10;
+      conjunto.add(x);
+      conjunto.add(y);
+      conjunto.add(z);
+      Iterator o = conjunto.iterator();
+      while (o.hasNext()) {
+          A azinho = (A)o.next();
+          System.out.println( azinho.a );
+      }
+
+    }
+}
+
+class A {
+   int a = 0;
+
+   public int hashCode() {
+       return 10;
+   }
+
+       public boolean equals(Object o) {
+      boolean rc = false;
+      if (o == null) {
+          rc = false;
+      }
+      else {
+          if ((o instanceof A) && ((A)o).a == this.a) {
+         rc = true;
+          }
+      }
+      return rc;
+       }
+}
+
+
+Resultado:
+
+20
+10
+
+Nesse caso, alteramos a classe A e determinar que quando o membro a tiver o mesmo valor será considerada igual (semelhantes as classes Wrappers) - por isso que nesse caso foram inseridos somente dois objetos no conjunto.
+
+Bom agora que acreditamos que ficou claro essa questão da unicidade dos elementos nas classes Set´s, vejamos suas implementações usadas.
+
+HashSet - é um conjunto não-ordenado e não-classificado, utiliza o código hash do elemento que está sendo inserido para saber em qual depósito deve armazenar, com isso podemos notar que um cálculo de código hash ineficiente é a morte para a boa performance durante o processo de inserção/recuperação. Nunca use essa classe quando precisar de uma ordem na iteração.
+
+LinkedHashSet - é um conjunto ordenado e duplamente encadeado, com isso podemos iterar pelos seus elementos em uma ordem, sempre use essa classe quando precisar de ordem na iteração, porém saiba que é um pouco mais lenta que HashSet na inserção visto que leva mais tempo para registrar os vizinhos (elemento posterior e inferior).
+
+TreeSet - essa é uma das duas classes do framework de coleção da api Java que é classificada e ordenada - essa classificação se dá pela ordem natural da classe que está sendo inserida (isso pode ser alterado mas foge do nosso escopo), vejamos algumas classificações naturais para as classes mais usadas:
+
+Classe	 Ordem Natural
+
+Byte signed numerical
+Character unsigned numerical
+Long signed numerical
+Integer signed numerical
+Short signed numerical
+Double signed numerical
+Float signed numerical
+BigInteger signed numerical
+BigDecimal signed numerical
+File system-dependent lexicographic on pathname.
+String lexicographic
+Date chronological
+
+7.2.4 - Map
+
+As classes que implementam a interface Map tem funcionalidades distintas da aprendida até aqui, vejamos porquê. Aprendemos que em uma lista o índice é relevante para se pesquisar ou até mesmo inserir um objeto no meio no fim ou em qualquer posição da lista, já nas classes Set´s, a unicidade é a característica fundamental dessas classes sendo necessário uma correta relação dos métodos equals e hashCode para seu funcionamento, já as classes Map´s faz uma mapeamento de chave X valor, ou seja, você tem um objeto chave para um objeto valor. Vejamos um exemplo de seu uso:
+
+import java.util.*;
+
+public class TestMap {
+   public static void main(String[] args) {
+       HashMap map = new HashMap();
+           map.put( "um", new Integer(1) );
+           map.put( "dois", new Integer(2) );
+           map.put( "tres", new Integer(3) );
+           map.put( "quatro", new Integer(4) );
+   }
+}
+
+
+Note que um objeto (nesse caso String) é mapeado para cada um valor do conjunto, portanto nas classes Map´s a unicidade da chave é relevante, se você tentar inserir um item como podemos ver abaixo, você não terá um novo item no conjunto pois a chave é idêntica, o valor somente é substituído.
+
+map.put( "dois", new Float(30.0f) );
+
+Podemos concluir que a chave do conjunto Map é um Objeto de uma classe Set, ou seja, a chave deve ser única, o processo para saber se a chave está no conjunto é idêntica ao processo explicado nas classes Set´s, com isso, uma boa implementação dos métodos hashCode e equals é imprescindível para a boa performance desse conjunto.
+
+Vejamos isso na prática:
+
+import java.util.*;
+
+1. public class TestMap {
+2.   public static void main(String[] args) {
+3.       HashMap map = new HashMap();
+4.       map.put( "um", new Integer(1) );
+5.       map.put( "dois", new Integer(2) );
+6.       map.put( "tres", new Integer(3) );
+7.       System.out.println( "Antes: "+map.size());
+8.       map.put( "um", new Float(1f) );
+9.       System.out.println( "Depois: "+map.size());
+10.   }
+11. }
+
+
+Resultado:
+
+Antes: 3
+Depois: 3
+
+Note que mesmo adicionando um objeto diferente na linha 8, o resultado do tamanho do conjunto não foi alterado. Fica subitamente entendido que se a classe usada na chave (nesse caso String) não substituir os métodos equals e hashCode, todo objeto será adicionado no conjunto, o que não faz muito sentido, portanto sempre utilize um objeto de uma classe onde seus métodos equals e hashCode tenham sido substituídos.
+
+HashMap - é um conjunto Map não-ordenado e não classificado. Permite a existência de chave e valores nulos. Vejamos um exemplo esdrúxulo, porém funcional:
+
+import java.util.*;
+
+public class TestMap {
+   public static void main(String[] args) {
+       HashMap map = new HashMap();
+       String um, dois;
+       um = null;
+       dois = null;
+       map.put( um, new Integer(1) );
+       map.put( dois, new Integer(2) );
+       System.out.println( "Tamanho: "+map.size());
+   }
+}
+
+
+O resultado será: Tamanho 1
+
+Hashtable - essa classe é equivalente à HashMap com a diferença que seus métodos são sincronizados, e, além disso, não permite valores/chaves nulos.
+
+import java.util.*;
+
+public class TestMap {
+   public static void main(String[] args) {
+       Hashtable map = new Hashtable();
+       String um = null;
+       String dois = null;
+       map.put( "um", um );
+       map.put( "dois", dois );
+       System.out.println( "Tamanho: "+map.size());
+   }
+}
+
+
+[color=red:7fc9c06e81]Erro: java.lang.NullPointerException at java.util.Hashtable.put(Hashtable.java:386) at TestMap.main(TestMap.java: 8) Exception in thread "main"[/color:7fc9c06e81]
+
+Só pra relaxar: Note que a nomeclatura de nomes da Java para essa classe foi esquecida, pois o t em Hashtable deveria ser maiúsculo.
+
+LinkedHashMap - é uma versão ordenada (ordem de inserção/acesso) da interface Map, embora seja um pouco mais lento para inserção e remoção, visto que deve sempre registrar seus sucessor e predecessor, porém a iteração é bem rápida, e, isso tudo por ser uma classe duplamente encadeada.
+
+TreeMap - é a outra classe da Framework Collection Java que é classificada e consequentemente ordenada, vejamos uma aplicação dessa classe:
+
+import java.util.*;
+public class TestMap {
+   public static void main(String[] args) {
+       TreeMap map = new TreeMap();
+       long inicio, fim;
+       inicio = System.currentTimeMillis();
+       int n = 500000;
+       for (int i=0; i < n; i++) {
+      map.put( "um"+i, new Integer(i) );
+       }
+       fim = System.currentTimeMillis();
+       System.out.println( "Tempo inserir: " + (fim - inicio)/1000.000 );
+   }
+}
+
+
+Resultado: Tempo inserir: 3.937
+
+Porém o resultado estaria em ordem (nesse caso lexicographic) pois se trata de uma classe String.
+
+Bom isso encerrado o estudo das classes de coleções que a Framework Java nos oferece.
+
+7.3 - Coleta de Lixo
+
+A memória sempre foi o "calcanhar de aquiles" para as linguagens de programação. Uma linguagem de programação se diz tipada, por poder definir tipos de dados, por exemplo, uma variável inteira/integer é um tipo, cada linguagem de programação tem uma representação para o tipo inteiro, em pascal um tipo inteiro corresponde a um interval que provavelmente não equivale o mesmo intervalo em Java, e essas definições são essencialmente para o melhor aproveitamento da memória, pois com a definição dos tipos podemos (os programas podem) estimar o uso de memória, saber quanto um programa ou uma rotina vai usar, enfim a memória é um elemento essencial e primordial para o sucesso de qualquer programa, por isso devemos saber aproveitá-la.
+O gerenciamento da memória não é uma tarefa fácil, saber quando um objeto está pronto para ser dilacerado (sempre quis usar essa palavra), anular uma referência, re-referenciar um objeto, sugerir a execução do coletor de lixo, todos esses conceitos serão entendidos (pelo menos é o que esperamos) a partir de agora.
+
+Como o coletor de lixo funciona
+
+Você poderá encontrar dezenas de teorias de como o coletor funciona, mas não caia nessa, pode ser que sim ou que não, ou sei lá ! Mas vamos entender uma coisa: um programa Java roda simultaneamente vários processos ou vamos chamar segmentos (não gosto muito desse nome, prefiro chamar thread), e um segmento pode estar ou não ativo, e um objeto está pronto para ser extirpado quando nenhum segmento não pode alcançar esse objeto, simples não ?
+Você pode dar uma mão para o coletor de lixo, porém não caia na idéia de que pode chamá-lo quando bem entender, você pode sugerir: hein tá na hora da limpeza, mas não é garantido que ele venha. Portanto se você se deparar com uma questão perguntando qual a maneira mais precisa de se executar o coletor de lixo ? Não hesite em marcar: IMPOSSÍVEL !!!
+
+Anulando uma referência:
+
+1. public class Test {
+2. public static void main(String[] args) {
+3.   StringBuffer b = new StringBuffer("hello");
+4.   System.out.println(b);
+5.   b = null;
+6. } }
+
+
+A partir da linha 5, o objeto b não referencia mais nada da memória, portanto o coletor pode muito bem eliminar a String "hello" que deverá estar ocupando lugar. Isso é muito gentil por parte dos programadores, anular uma referência sempre que não venha mais precisar do objeto.
+
+Vejamos outro exemplo:
+
+1. public class Test {
+2.   public static void main(String[] args) {
+3.       StringBuffer sb1 = new StringBuffer("hello");
+4.       StringBuffer sb2 = new StringBuffer("my friendy");
+5.       System.out.println( sb1 );
+6.    sb1 = sb2;
+7.   }
+8. }
+
+
+Após a execução da linha 6, a string "hello" ficará perdida na memória, estando disponível para o coletor de lixo executar o seu trabalho.
+
+Objetos dentro de um método
+
+Todos os objetos criados localmente dentro de um método estarão qualificados para a coleta após a execução do método. Vejamos um exemplo:
+
+public void show() {
+   String s1 = "s1";
+   String s2 = "s2";
+   System.out.println(s1+s2);
+}
+
+
+Após a execução do métodos acima, os dois objetos s1 e s2 estarão qualificados para a coleta, agora vejamos um outro exemplo:
+
+public String show() {
+   String s1 = "s1";
+   System.out.println(s1+s2);
+return s1;
+}
+
+
+Note que o objeto s1 está sendo utilizado no retorno do método, portanto esse objeto não pode ser coletar, mesmo porque, ele ainda está sendo referenciado.
+
+Isolando uma referência
+
+Vamos complicar um pouco as referências para ver o que acontece com os objetos:
+
+public class Test {
+   Test t;
+
+   public static void main(String[] args) {
+      Test t2 = new Test();
+      Test t3 = new Test();
+      Test t4 = new Test();
+
+      t2.t = t3;
+      t3.t = t4;
+      t4.t = t2;
+
+      t2 = null;
+      t3 = null;
+      t4 = null;
+   }
+}
+
+
+O que achas que acontece nesse caso ?? Calma vamos entender:
+
+Apenas três objetos foram criados na memória: t2, t3, t4.
+
+Quando os objetos t2, t3 e t4 foram anulados, tornaram-se qualificados para a coleta, mesmo existindo outras referências para esses objetos.
+
+Sugerindo a coleta
+
+import java.util.Date;
+public class Memory {
+   public static void main(String[] args) {
+      Runtime rt = Runtime.getRuntime();
+      System.out.println("Memoria total: "+rt.totalMemory());
+System.out.println("Memoria Antes: "+rt.freeMemory());
+Date d = null;
+for (int i=0; i < 5000; i++) {
+   d = new Date();
+   d = null;
+}
+System.out.println("Memoria Depois: "+rt.freeMemory());
+rt.gc();
+System.out.println("Memoria Final: "+rt.freeMemory());
+}
+}
+
+
+
+Note que a linha rt.gc() simplesmente sugere, não garante que a coletar efetivamente seja feita.

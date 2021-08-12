@@ -1,0 +1,151 @@
+em Português ::
+
+http://www.cos.ufrj.br/
+Prof: Ricardo Farias
+A idéia básica do Merge Sort é criar uma sequência ordenada a partir de duas outras também ordenadas. Para isso, o algoritmo Merge Sort divide a sequência original em pares de dados, agrupa estes pares na ordem desejada; depois as agrupa as sequências de pares já ordenados, formando uma nova sequência ordenada de quatro elementos, e assim por diante, até ter toda a sequência ordenada.
+
+Algoritmo:
+Os três passos úteis dos algoritmos dividir-para-conquistar, que se aplicam ao Merge Sort são:
+
+    Dividir: Dividir os dados em subsequências pequenas;
+    Este passo é realizado recursivamente, iniciando com a divisão do vetor de n elementos em duas metades, cada uma das metades é novamente dividida em duas novas metades e assim por diante, até que não seja mais possível a divisão (ou seja, sobrem n vetores com um elemento cada).
+    Conquistar: Classificar as duas metades recursivamente aplicando o merge sort;
+    Combinar: Juntar as duas metades em um único conjunto já classificado.
+    Para completar a ordenação do vetor original de n elementos, faz-se o merge ou a fusão dos sub-vetores já ordenados.
+
+A desvantagem do Merge Sort é que requer o dobro de memória, ou seja, precisa de um vetor com as mesmas dimensões do vetor que está sendo classificado.
+
+Observe a figura: Vetor original com elemento desordenados.
+
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    53 	25 	46 	32 	23 	37 	41 	17 	10
+
+O vetor original é subdividido em dois vetores.
+
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    53 	25 	46 	32 	23 	37 	41 	17 	10
+
+Cada um dos subvetores é novamente dividido.
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    53 	25 	46 	32 	23 	37 	41 	17 	10
+
+E assim por diante.
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    53 	25 	46 	32 	23 	37 	41 	17 	10
+elem    53 	25 	46 	32 	23 	37 	41 	17 	10
+
+Após todo o processo de divisão, ocorre o processo da fusão ordenada dos subvetores. O subvetor (53) com o subvetor (25). Ordenando os dois.
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    25 	53 	46 	32 	23 	37 	41 	17 	10
+
+O subvetor (25, 53) com o subvetor (46). Ordenando os dois.
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    25 	46 	53 	32 	23 	37 	41 	17 	10
+
+O subvetor (32) com o subvetor (23).
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    25 	46 	53 	23 	32 	37 	41 	17 	10
+
+O subvetor (25,46,53) com o subvetor (23,32). Ordenando os dois.
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    23 	25 	32 	46 	53 	37 	41 	17 	10
+
+O mesmo processo se repete no subvetor (37, 41, 17, 10).
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    23 	25 	32 	46 	53 	37 	41 	17 	10
+elem    23 	25 	32 	46 	53 	37 	41 	10 	17
+elem    23 	25 	32 	46 	53 	10 	17 	37 	41
+
+Os subvetores resultantes (23,25, 32, 36,53) e (10, 17, 37, 41) são fundidos ordenandos durante a fusão.
+index   0 	1 	2 	3 	4 	5 	6 	7 	8
+elem    10 	17 	23 	25 	32 	37 	41 	46 	53
+
+
+Algorithm to merge sorted arrays
+
+In the article we present an algorithm for merging two sorted arrays. One can learn how to operate with several arrays and master read/write indices. Also, the algorithm has certain applications in practice, for instance in merge sort.
+
+Merge algorithm
+
+Assume, that both arrays are sorted in ascending order and we want resulting array to maintain the same order. Algorithm to merge two arrays A[0..m-1] and B[0..n-1] into an array C[0..m+n-1] is as following:
+
+Introduce read-indices i, j to traverse arrays A and B, accordingly. Introduce write-index k to store position of the first free cell in the resulting array. By default i = j = k = 0.
+At each step: if both indices are in range (i < m and j < n), choose minimum of (A[i], B[j]) and write it to C[k]. Otherwise go to step 4.
+Increase k and index of the array, algorithm located minimal value at, by one. Repeat step 2.
+Copy the rest values from the array, which index is still in range, to the resulting array.
+Enhancements
+
+Algorithm could be enhanced in many ways. For instance, it is reasonable to check, if A[m - 1] < B[0] or B[n - 1] < A[0]. In any of those cases, there is no need to do more comparisons. Algorithm could just copy source arrays in the resulting one in the right order. More complicated enhancements may include searching for interleaving parts and run merge algorithm for them only. It could save up much time, when sizes of merged arrays differ in scores of times.
+
+Complexity analysis
+
+Merge algorithm's time complexity is O(n + m). Additionally, it requires O(n + m) additional space to store resulting array.
+
+Code snippets
+
+Java implementation
+
+// size of C array must be equal or greater than
+// sum of A and B arrays' sizes
+public void merge(int[] A, int[] B, int[] C) {
+      int i, j, k, m, n;
+      i = 0;
+      j = 0;
+      k = 0;
+      m = A.length;
+      n = B.length;
+      while (i < m && j < n) {
+            if (A[i] <= B[j]) {
+                  C[k] = A[i];
+                  i++;
+            } else {
+                  C[k] = B[j];
+                  j++;
+            }
+            k++;
+      }
+      if (i < m) {
+            for (int p = i; p < m; p++) {
+                  C[k] = A[p];
+                  k++;
+            }
+        } else {
+            for (int p = j; p < n; p++) {
+                  C[k] = B[p];
+                  k++;
+            }
+      }
+}
+C++ implementation
+
+// m - size of A
+// n - size of B
+// size of C array must be equal or greater than
+// m + n
+void merge(int m, int n, int A[], int B[], int C[]) {
+      int i, j, k;
+      i = 0;
+      j = 0;
+      k = 0;
+      while (i < m && j < n) {
+            if (A[i] <= B[j]) {
+                  C[k] = A[i];
+                  i++;
+            } else {
+                  C[k] = B[j];
+                  j++;
+            }
+            k++;
+      }
+      if (i < m) {
+            for (int p = i; p < m; p++) {
+                  C[k] = A[p];
+                  k++;
+            }
+      } else {
+            for (int p = j; p < n; p++) {
+                  C[k] = B[p];
+                  k++;
+            }
+      }
+}

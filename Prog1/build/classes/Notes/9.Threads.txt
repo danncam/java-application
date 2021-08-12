@@ -1,0 +1,813 @@
+Capítulo 9 - Threads
+
+9.1 - Uma visão sobre Threads
+
+Antes de qualquer estudo mais aprofundado sobre threads, gostaríamos de deixar bem claro alguns pontos importantes para o sucesso da absorção do conteúdo desse capítulo.
+Com o crescimento do poder de processamento dos computadores modernos, e as inovações dos sistemas operacionais para criar um ambiente de trabalho amigável junto aos seus usuários, uma série de inovações foram acrescidas, e, um recurso que ganhou espaço e tem se mostrato bastante interessante é o processamento paralelo, onde um processo pode se dividir em inúmeros processos de dimensões menores para resolver problemas distintos. Calma que não é mágica. O que acontece na verdade é o seguinte: em um ambiente monoprocessado, um processo maior que é responsável pelos subprocessos divide o tempo do processador entre esses subprocessos, ou seja, começa a executar o subprocesso 01, após algum tempo (esse tempo depende da JVM e SO) esse processo fica aguardando sua vez de continuar sendo executado, a partir daí o processador está livre para execução de um outro processo, até que novamente o subprocesso 01 volta a ser executado, até que por algum motivo ele termina. Esse recurso é bastante intrigante pois permite-nos resolver problemas que levaríamos um tempo bem superior, uma vez que sem esse poder de escalonar o processador, o processo começaria e terminaria para assim liberar o processador a iniciar a execução de um novo processo.
+
+Em java, temos duas alternativas para implementar o recurso de multi-thread:
+
+a) Estendendo da Classe Thread
+b) Implementando a Interface Runnable
+
+Vejamos um exemplo para cada método:
+
+a) Estendendo de java.lang.Thread:
+
+public class Execucao {
+   public static void main(String[] args) {
+      Proc p = new Proc();
+      p.start();
+      while (true) {
+         System.out.println("thread main executando");
+}
+}
+}
+
+class Proc extends Thread {
+   public void run() {
+      while (true) {
+         System.out.println("thread executando");
+}
+}
+}
+
+
+b) Implementando a interface Runnable
+
+public class Execucao {
+   public static void main(String[] args) {
+      Proc p = new Proc();
+      Thread t = new Thread(p);
+      t.start();
+      while (true) {
+         System.out.println("thread main executando");
+}
+}
+}
+
+class Proc implements Runnable {
+   public void run() {
+      while (true) {
+         System.out.println("thread executando");
+}
+}
+}
+
+
+Por mais que os códigos acima possam não ter muito sentido, posso-lhe garantir que funcionam. O método main é uma thread e instancia um objeto p que também é instancia de uma classe que estende de Thread. O método start() chamado, informa ao escalonador de thread que coloque na fila de execução a Thread p, mas não pense que a thread p vai executar imediatamente quando o método start foi chamado, somente sinaliza o escalonador (ei, eu sou p e sou thread, me execute assim que puder, obrigado).
+
+9.2 - O que uma thread executa
+
+Você já deve ter notado que nos exemplos anteriores o código da Thread fica no método run, porém mostramos duas formas de se executar um thread, então vamos entender. Quando uma classe herda de Thread e implementa seu método abstrato run, o código que se encontrar dentro é executado. Já quando uma classe implementa Runnable e implementa o método run, o método que é executado é o método da classe que implementa a interface Runnable. Você nunca poderá chamar diretamente o método run de uma classe Thread, pois assim, o processador não será dividido entre os diversos processos, você deverá chamar o método start para que o escalonador saiba da existência da Thread, e deixe que o método run seja executado pelo escalonador. Se você não chamar o método start, sua thread nunca será executada.
+
+A assinatura do método run é:
+
+public void run()
+
+
+Note que o método não lança nenhuma exceção checada, isso significa que você não poderá fazer.
+
+9.3 - Métodos importantes da classe Thread
+
+Os métodos a seguir precisam ser decorados, lembrados na hora do exame:
+
+run() - é o código que a thread executará.
+
+start() - sinaliza à JVM que a thread pode ser executada, mas saiba que essa execução não é garantida quando esse método é chamado, e isso pode depender da JVM.
+
+isAlive() - volta true se a thread está sendo executada e ainda não terminou.
+
+sleep() - suspende a execução da thread por um tempo determinado;
+
+yield() - torna o estado de uma thread executável para que thread com prioridades equivalentes possam ser processadas, isso será estudando mais adiante;
+
+currentThread() - é um método estático da classe Thread que volta qual a thread que está sendo executada.
+
+getName() - volta o nome da Thread, você pode especificar o nome de uma Thread com o método setName() ou na construção da mesma, pois existe os construtores sobrecarregados.
+
+9.4 - Métodos herdados de java.lang.Object relacionados com Threads
+
+Os métodos a seguir pertencem à classe Object, porém estão relacionados com a programação Multi-Threading:
+
+public final void wait()
+public final void notify()
+public final void notifyAll()
+
+
+Examinaremos os métodos acima citados, porém antes de qualquer coisa precisamos entender os estados de uma thread, e é isso que vamos entender a partir de agora.
+
+9.5 - Estados dos segmentos
+
+Novo - estado que uma thread fica no momento de sua instanciação, antes da chamada do método start();
+
+Executável - estado em que a thread fica disponível para ser executada e no aguardo do escalonador de thread, esperando a sua vez de se executar;
+
+Execução - Momento em que a thread está executando, está operando, trabalhando, pagando seu salário e sua execução continua até que por algum motivo (que veremos brevemente) esse momento é interrompido;
+
+Espera/Bloqueio/Suspensão - esse estado pode ser dar por inúmeros motivos, e vamos tentar esplanar alguns. Uma thread em seu grande momento de glória (sua execução) pode se bloquear por que algum recurso ou objeto não está disponível, por isso seu estado pode ficar bloqueado, até que esse recurso/objeto esteja disponível novamente assim seu estado torna-se executável, ou então, uma thread pode ficar suspensa porque o programador definiu um tempo de espera, assim que esse tempo expirar essa thread volta ao estado executável para continuar seus serviços;
+
+Inativo - a partir do momento em que o método run() foi concluído, a thread se tornará inativa, porém ainda existirá o objeto na memória, somente não como uma linha de execução, e não poderá novamente se estartado, ou seja, qualquer tentativa de chamada do método start() após a conclusão do métodos run(), uma exceção será lançada e não duvide;
+
+9.6 - Impedindo uma thread de ser executada
+
+Suspendendo uma thread
+
+Pense em uma situação em que você tenha 10 Thread rodando simultâneamente (sei, eu fui redundante agora), porém uma delas você deseja tarefa realizada, ela aguarde 5 minutos para prosseguir suas tarefas, por mais que isso pareça loucura, mas é possível, você poderá usar o método sleep para tornar uma thread no modo suspenso até que esse tempo expire, vejamos sua sintaxe:
+
+try {
+    sleep(5*60*1000);
+}
+catch (InterruptedException ex) {
+}
+
+
+O código acima, faz com que a thread espere por 5 minutos até voltar ao estado Executável, porém é uma alternativa quando se pretende executar as thread de forma mais organizada, apesar de que lembre-se sempre: VOCÊ NUNCA TERÁ GARANTIAS QUANTO A ORDEM DA EXECUÇÃO DAS THREAD, POIS ISSO VAI DEPENDER DO ESCALONADOR !
+Qualquer pergunta com relação à tentativa de garantir um ordem, ou sequencia de execução das thread, não hesite em marcar a alternativa que diz que não existe garantias para tal tarefa.
+
+Não pense que o tempo que for especificado no método sleep será exatamento o tempo que a thread ficará sem executar, a única garantia que teremos é que esse será o tempo mínimo, porém após o seu término, seu estado passa para Executável e não Execução.
+
+Tenha em mente que o método sleep é um método estático, portanto você não poderá chamar o método sleep de um thread x ou y, somente da thread que estiver em estado de execução.
+
+Vejamos um exemplo prático:
+
+public class Exec11 {
+   public static void main(String args[]) {
+      Contador c1 = new Contador();
+      c1.setQtde(10);
+      c1.setName("t001");
+      c1.start();
+      Contador c2 = new Contador();
+      c2.setQtde(15);
+      c2.setName("t002");
+      c2.start();
+   }
+}
+
+class Contador extends Thread {
+   private int qtde = 0;
+   public void run() {
+      for (int i=0; i <= 100; i++) {
+         if ((i%qtde) == 0) {
+                                    System.out.println(Thread.currentThread().getName()+"> "+i);
+         }
+         try {
+            sleep(500);
+          }
+          catch (InterruptedException ex) {
+         }
+      }
+   }
+
+   public void setQtde(int value) {
+      this.qtde = value;
+      if (this.qtde == 0) this.qtde = 10;
+   }
+}
+
+
+Por mais que tenha se tentado estabelecer uma ordem, se você executar o código acima irá perceber que não há garantias de ordem na execução.
+
+
+9.7 - Prioridades
+
+A prioridade também é assunto contundente, pois cada JVM define a sua maneira de escolher a thread que passará do estado de executável para execução. Pois a especificação Java não define nada a respeito. Por isso não confie em prioridades para garantir uma execução sincronizadas de suas threads, use-as para melhorar a eficiência de suas tarefas. Para definir uma prioridade para uma thread você usará o método
+
+public void setPriority(xxx)
+
+
+onde xxx - é um número inteiro compreendido entre 1 e 10
+A prioridade padrão é 5, ou seja, se não for definida nenhuma prioridade, será assumido o valor 5 para a thread.
+
+Você poderá cair em uma situação em que poderá ter várias thread com a mesma prioridade, e desejar que thread que estiver executando dê lugar para outras serem processadas, e para isso existe o método yield() que faz justamente isso, torna o estado de execução da thread atual para executável e dá o lugar para as demais thread de prioridades semelhantes. Não obstante a isso, não garante que a thread que vai ser executada, não seja a mesma que acabou de sair do estado de execução, portanto esse método também não garante fazer o que se propõe.
+
+9.8 - Hierarquia de Threads
+
+Imagine que você tenha uma thread Y que só poderá ser executada quando a thread X concluir sua tarefa, você poderá ligar uma thread à outra, usando o método join(), vamos entender isso a partir de agora:
+
+Examinemos o código a seguir:
+
+public class Exec12 {
+   public static void main(String args[]) {
+      try {
+         Contador c1 = new Contador();
+         c1.setQtde(10);
+         c1.setName("t001");
+         c1.start();
+         c1.join();
+         for (int i=0; i <= 100; i++) {
+            if ((i%5) == 0) {
+               System.out.println(Thread.currentThread().getName()+"> "+i);
+            }
+         }
+      }
+      catch (InterruptedException e) {
+      }
+   }
+}
+
+class Contador extends Thread {
+   private int qtde = 0;
+   public void run() {
+      for (int i=0; i <= 100; i++) {
+         if ((i%qtde) == 0) {
+            System.out.println(Thread.currentThread().getName()+"> "+i);
+         }
+         try {
+            sleep(500);
+          }
+          catch (InterruptedException ex) {
+         }
+      }
+   }
+
+   public void setQtde(int value) {
+      this.qtde = value;
+      if (this.qtde == 0) this.qtde = 10;
+   }
+}
+
+
+Resultado do código acima:
+
+t001> 0
+t001> 10
+t001> 20
+t001> 30
+t001> 40
+t001> 50
+t001> 60
+t001> 70
+t001> 80
+t001> 90
+t001> 100
+main> 0
+main> 5
+main> 10
+main> 15
+main> 20
+main> 25
+main> 30
+main> 35
+main> 40
+main> 45
+main> 50
+main> 55
+main> 60
+main> 65
+main> 70
+main> 75
+main> 80
+main> 85
+main> 90
+main> 95
+main> 100
+
+
+O exemplo acima garante que a thread main só será executada quando a Thread t001 estiver inativa.
+
+Vamos complicar um pouco.... O método join é sobrecarregado e pode receber um valor long que corresponde à quantidade millissegundos que a thread main (em nosso caso) anterior espera até que t001 se concluir, se a mesma não ficar inativa no tempo informado, nada mais é garantido, ou seja, o escalonador poderá iniciar a execução de ambas as threads. Vamos alterar um pouco o código e observar os resultados:
+
+public class Exec13 {
+   public static void main(String args[]) {
+      try {
+         Contador c1 = new Contador();
+         c1.setQtde(10);
+         c1.setName("t001");
+         c1.start();
+         c1.join(5000);
+         for (int i=0; i <= 100; i++) {
+            if ((i%5) == 0) {
+               System.out.println(Thread.currentThread().getName()+"> "+i);
+            }
+         }
+      }
+      catch (InterruptedException e) {
+      }
+   }
+}
+
+class Contador extends Thread {
+   private int qtde = 0;
+   public void run() {
+      for (int i=0; i <= 100; i++) {
+         if ((i%qtde) == 0) {
+            System.out.println(Thread.currentThread().getName()+"> "+i);
+         }
+         try {
+            sleep(250);
+          }
+          catch (InterruptedException ex) {
+         }
+      }
+   }
+
+   public void setQtde(int value) {
+      this.qtde = value;
+      if (this.qtde == 0) this.qtde = 10;
+   }
+}
+
+
+Resultado:
+
+t001> 0
+t001> 10
+main> 0
+main> 5
+main> 10
+main> 15
+main> 20
+main> 25
+main> 30
+main> 35
+main> 40
+main> 45
+main> 50
+main> 55
+main> 60
+main> 65
+main> 70
+main> 75
+main> 80
+main> 85
+main> 90
+main> 95
+main> 100
+t001> 20
+t001> 30
+t001> 40
+t001> 50
+t001> 60
+t001> 70
+t001> 80
+t001> 90
+t001> 100
+
+Note que a thread main só esperou pelo tempo de 5000 (5 segundos) a partir dai ela começou sua execução.
+
+9.9 - Sincronização
+
+O assunto agora é um pouco mais complicado do que o estudado até agora, pois trata de como duas ou mais threads podem compartilhar o mesmo objeto, ou seja, quais são os riscos que corremos quando dois objetos podem ser vistos simultâneamente.
+
+Cenário:
+
+Imaginemos um processo de compra on-line pela Internet, onde inúmeras pessoam podem consultar os itens disponíveis em estoque e realizar seus pedidos. Pois bem, como não queremos causar situações indigestas com nossos clientes, precisamos garantir com seus pedidos sejam faturados corretamente. Bom onde queremos chegar ? Imagine que temos 5 aparelhos celulares S55 SIEMENS em nosso estoque e que foi lançado uma promoção desse aparelho e 200 pessoas estão dispostas a entrar no tapa por um aparelho, bem temos que garantir que esse processo seja concretizado sem maiores problema. (tudo isso foi dito para se esplanar a situação... ) Vejamos como resolver esse problema:
+
+public class PedidoCompra {
+   public static void main(String[] args) {
+      Produto p = new Produto(5);
+      Thread[] t = new Thread[15];
+      for (int i=0; i < t.length; i++ ) {
+         t[i] = new Thread(p);
+         t[i].setName("Cliente: "+i);
+         t[i].start();
+      }
+   }
+}
+
+class Produto implements Runnable {
+   private int estoque = 5;
+
+   public void run() {
+      try {
+      for (int i=0; i<2; i++) {
+            efetuarPedido();
+         }
+      }
+      catch (Exception ex) {
+      }
+   }
+
+   public void efetuarPedido() {
+      try {
+         if (this.estoque > 0) {
+            System.out.println("Pedido faturado para o cliente "+Thread.currentThread().getName());
+             Thread.sleep(250);
+             this.estoque--;
+         } else {
+            System.out.println("Não tem estoque para o cliente "+Thread.currentThread().getName());
+         }
+      }
+      catch (Exception ex) {
+      }
+   }
+
+   public Produto(int value) {
+      this.estoque = value;
+   }
+}
+
+
+Não tenter vender o programa acima para alguma loja que você será escurraçado!
+
+O código de efetuar pedido, sempre efetuará o pedido tendo ou não estoque, note que na saída houve 10 cliente que efetuaram seus pedidos com estoque estourado:
+
+Pedido faturado para o cliente Cliente: 0
+Pedido faturado para o cliente Cliente: 1
+Pedido faturado para o cliente Cliente: 2
+Pedido faturado para o cliente Cliente: 3
+Pedido faturado para o cliente Cliente: 5
+Pedido faturado para o cliente Cliente: 6
+Pedido faturado para o cliente Cliente: 8
+Pedido faturado para o cliente Cliente: 9
+Pedido faturado para o cliente Cliente: 10
+Pedido faturado para o cliente Cliente: 11
+Pedido faturado para o cliente Cliente: 4
+Pedido faturado para o cliente Cliente: 7
+Pedido faturado para o cliente Cliente: 12
+Pedido faturado para o cliente Cliente: 13
+Pedido faturado para o cliente Cliente: 14
+Pedido faturado para o cliente Cliente: 0
+Pedido faturado para o cliente Cliente: 1
+Pedido faturado para o cliente Cliente: 2
+Pedido faturado para o cliente Cliente: 3
+Nao tem estoque para o cliente Cliente: 5
+Nao tem estoque para o cliente Cliente: 6
+Nao tem estoque para o cliente Cliente: 8
+Nao tem estoque para o cliente Cliente: 9
+Nao tem estoque para o cliente Cliente: 11
+Nao tem estoque para o cliente Cliente: 10
+Nao tem estoque para o cliente Cliente: 4
+Nao tem estoque para o cliente Cliente: 12
+Nao tem estoque para o cliente Cliente: 7
+Nao tem estoque para o cliente Cliente: 13
+Nao tem estoque para o cliente Cliente: 14
+
+O que queremos é não permitir que haja faturamento caso o estoque esteja negativo.
+Pelo resultado não é muito difícil deduzir o que aconteceu nesse processamento - embora você possa executar e obter outro resultado. Observe que todos os pedidos só foram efetuados porque há no método efetuarPedido uma suspensão da execução das thread para sua concretização, ou seja, até o momento em que a thread volta após sua suspensão, o pedido ainda não foi efetuado, com isso, outros clientes podem efetuar seus pedidos - quando esse ciclo se repetir para os 5 primeiros clientes, aí sim, não será mais possível concretizar pedidos, pois o estoque do item se tornou 0. Porém não foi exatamente isso que aconteceu em nosso exemplo anterior. E você é capaz de descobrir porque ?
+
+A grande sacada do programa anterior é suspender a thread por um tempo para que antes de concluir sua operação, dando lugar as outras, fazendo com que o estoque fique negativo.
+
+Mas existe uma solução para que esse "erro" seja revertido, ou seja, não permitir que dois clientes possam concluir seus pedidos ao mesmo tempo.
+
+Vamos alterar o código anterior, e acrescentar o modificar synchronized que não permite com que 2 thread executem o mesmo método ao mesmo tempo, ou seja, as demais thread ficam esperando até que a thread em execução conclua seu processamento para assim iniciar o seu.
+
+Resultado:
+Pedido faturado para o cliente Cliente: 0
+Pedido faturado para o cliente Cliente: 1
+Pedido faturado para o cliente Cliente: 2
+Pedido faturado para o cliente Cliente: 3
+Pedido faturado para o cliente Cliente: 4
+Nao tem estoque para o cliente Cliente: 5
+Nao tem estoque para o cliente Cliente: 6
+Nao tem estoque para o cliente Cliente: 7
+Nao tem estoque para o cliente Cliente: 8
+Nao tem estoque para o cliente Cliente: 10
+Nao tem estoque para o cliente Cliente: 11
+Nao tem estoque para o cliente Cliente: 12
+Nao tem estoque para o cliente Cliente: 13
+Nao tem estoque para o cliente Cliente: 14
+Nao tem estoque para o cliente Cliente: 9
+Nao tem estoque para o cliente Cliente: 0
+Nao tem estoque para o cliente Cliente: 1
+Nao tem estoque para o cliente Cliente: 2
+Nao tem estoque para o cliente Cliente: 3
+Nao tem estoque para o cliente Cliente: 4
+Nao tem estoque para o cliente Cliente: 5
+Nao tem estoque para o cliente Cliente: 6
+Nao tem estoque para o cliente Cliente: 7
+Nao tem estoque para o cliente Cliente: 8
+Nao tem estoque para o cliente Cliente: 10
+Nao tem estoque para o cliente Cliente: 11
+Nao tem estoque para o cliente Cliente: 12
+Nao tem estoque para o cliente Cliente: 13
+Nao tem estoque para o cliente Cliente: 14
+Nao tem estoque para o cliente Cliente: 9
+
+Note que a saída agora melhorou ! E houve faturamento somente dos 5 itens !
+
+Pensamento Entrópico: Fazer condições e checagens para evitar que o estoque fique negativo ! Lembre-se sempre, você nunca terá certeza da ordem da execução das thread, ou seja, uma thread pode começar (tendo estoque 5) e terminar quando o estoque já acabou, outras threads foram mais rapidas.....
+
+Outro exemplo:
+
+public class Test {
+   public static void main(String[] args) {
+      Crediario c1 = new Crediario();
+      Crediario c2 = new Crediario();
+      Thread t1 = new Thread(c1);
+      t1.setName("t1");
+      Thread t2 = new Thread(c2);
+      t2.setName("t2");
+      t1.start();
+      t2.start();
+   }
+}
+
+class Crediario implements Runnable {
+      public void run() {
+         Cliente c = Cliente.getInstance();
+         System.out.println("Iniciando transacao de crediario... "+Thread.currentThread().getName()+" - "+c.toString());
+         c.analisarFicha();
+      }
+}
+
+class Cliente {
+   private static Cliente singleton;
+   public static Cliente getInstance() {
+      if (singleton == null) singleton = new Cliente();
+      return singleton;
+   }
+
+   synchronized void analisarFicha() {
+      try {
+         Thread.sleep(500);
+         System.out.println("Analisando ficha.... "+Thread.currentThread().getName());
+         Thread.sleep(500);
+         liberarFicha();
+      }
+      catch (Exception e) {
+      }
+   }
+
+   synchronized void liberarFicha() {
+      try {
+         Thread.sleep(500);
+         System.out.println("Liberando ficha.... "+Thread.currentThread().getName());
+      }
+      catch (Exception e) {
+      }
+   }
+}
+
+
+Vejamos um exemplo em que dois métodos são sincronizados e um não, e observe que pelo resultado nenhum problema há quando se chama um método sem sincroniza mesmo no caso do objeto estar bloqueado:
+
+public class Test {
+   public static void main(String[] args) {
+      Crediario c1 = new Crediario();
+      Crediario c2 = new Crediario();
+      Negativacao n1 = new Negativacao();
+      Thread t1 = new Thread(c1);
+      t1.setName("t1");
+      Thread t2 = new Thread(c2);
+      t2.setName("t2");
+      Thread t3 = new Thread(n1);
+      t3.setName("t3");
+      t1.start();
+      t2.start();
+      t3.start();
+   }
+}
+
+class Crediario implements Runnable {
+      public void run() {
+         Cliente c = Cliente.getInstance();
+         System.out.println("Iniciando transacao de crediario... "+Thread.currentThread().getName()+" - "+c.toString());
+         c.analisarFicha();
+      }
+}
+
+class Negativacao implements Runnable {
+      public void run() {
+         Cliente c = Cliente.getInstance();
+         System.out.println("Iniciando transacao de negativacao... "+Thread.currentThread().getName()+" - "+c.toString());
+         c.negativar();
+      }
+}
+
+
+class Cliente {
+   private static Cliente singleton;
+   public static Cliente getInstance() {
+      if (singleton == null) singleton = new Cliente();
+      return singleton;
+   }
+
+   synchronized void analisarFicha() {
+      try {
+         Thread.sleep(500);
+         System.out.println("Analisando ficha.... "+Thread.currentThread().getName());
+         Thread.sleep(500);
+         liberarFicha();
+      }
+      catch (Exception e) {
+      }
+   }
+
+   synchronized void liberarFicha() {
+      try {
+         Thread.sleep(500);
+         System.out.println("Liberando ficha.... "+Thread.currentThread().getName());
+      }
+      catch (Exception e) {
+      }
+   }
+
+   void negativar() {
+      try {
+         Thread.sleep(500);
+         System.out.println("Negativando ficha.... "+Thread.currentThread().getName());
+      }
+      catch (Exception e) {
+      }
+   }
+}
+
+
+Resultado:
+
+Iniciando transacao de crediario... t2 - Cliente@ba34f2
+Iniciando transacao de negativacao... t3 - Cliente@ba34f2
+Iniciando transacao de crediario... t1 - Cliente@ba34f2
+Analisando ficha.... t2
+Negativando ficha.... t3
+Liberando ficha.... t2
+Analisando ficha.... t1
+Liberando ficha.... t1
+
+Note que o processo de negativação se processou mesmo não terminando o processo de crediário.
+Agora vamos sincronizar o método sincronização para ver o que acontece:
+
+Iniciando transacao de crediario... t1 - Cliente@ba34f2
+Iniciando transacao de negativacao... t3 - Cliente@ba34f2
+Iniciando transacao de crediario... t2 - Cliente@ba34f2
+Analisando ficha.... t1
+Liberando ficha.... t1
+Negativando ficha.... t3
+Analisando ficha.... t2
+Liberando ficha.... t2
+
+Note que agora o processo de nativação (método negativar) só se procedeu após o término do processo de liberação. Uso nos leva a pensar em uma situação inesperada: o impasse..... vejamos no item seguinte:
+
+9.10 - Deadlock (impasse)
+
+Essa é uma situação em que duas thread ficam esperando um bloqueio, ou seja, a thread A fica aguardando o bloqueio que está sob bloqueio da thread B e a thread B está aguardando o bloqueio que está em possa da thread A, uma situação assim ocasionará em um travamento do sistema. Embora não seja uma situação comum, quando ocorre o sistema fica paralizado e além disso não é muito fácil encontrar o problema.
+
+O código a seguir mostra um exemplo bem simples de um deadlock:
+
+public class TestDeadLock {
+   public static void main(String[] args) {
+      Crediario c1 = new Crediario();
+      Negativacao n1 = new Negativacao();
+      Thread t1 = new Thread(c1);
+      t1.setName("t1");
+      Thread t2 = new Thread(n1);
+      t2.setName("t2");
+      t1.start();
+      t2.start();
+   }
+}
+
+class Crediario implements Runnable {
+      public void run() {
+         Class1.m1();
+      }
+}
+
+class Negativacao implements Runnable {
+      public void run() {
+         Class2.m1();
+      }
+}
+
+class Class1 {
+   static synchronized void m1() {
+      try {
+         Thread.sleep(500);
+         System.out.println("executando class1 m1");
+         Class2.m2();
+      }
+      catch (Exception e) {
+      }
+   }
+
+   static synchronized void m2() {
+      try {
+         Thread.sleep(500);
+         System.out.println("executando class1 m2");
+      }
+      catch (Exception e) {
+      }
+   }
+}
+
+class Class2 {
+   static synchronized void m1() {
+      try {
+         Thread.sleep(500);
+         System.out.println("executando class2 m1");
+         Class1.m2();
+      }
+      catch (Exception e) {
+      }
+   }
+
+   static synchronized void m2() {
+      try {
+         Thread.sleep(500);
+         System.out.println("executando class2 m2");
+      }
+      catch (Exception e) {
+      }
+   }
+}
+
+
+9.11 - Interação entre segmentos
+
+Eventualmente você precisará notificar um segmento que B que o segmento A finalizou sua tarefa, fazendo com que o segmento B possa entrar em estado de executável para se candidatar a executar.
+
+A classe Object define três métodos para realização dessa interação, são eles:
+
+
+wait()
+notify()
+notifyAll()
+
+Só um lembrete: como esses métodos são definidos na classe Object, todos os demais objetos tem esses métodos, até mesmo a classe Thread, portanto não vacile......
+
+Eles SEMPRE devem ser chamados de um contexto sincronizados.
+
+Um exemplo bem prático para esse recurso pode ser visto no trecho abaixo, pois uma thread de leitura aguarda a criação de um arquivo que é gerado por outra thread, vejamos o código:
+
+import java.io.*;
+
+public class InteraThread {
+   public static void main(String[] args) {
+      try {
+         Arquivo arq = new Arquivo(new File("saida.txt"));
+         Thread[] a = new Thread[20];
+         for (int i=0; i < a.length; i++) {
+            a[i] = new Thread(new Leitura(arq));
+            a[i].setName( ""+i);
+            a[i].start();
+         }
+         Thread b = new Thread( new Gravacao(arq) );
+         b.start();
+         b.join();
+         System.out.println("Processo finalizado...");
+      }
+      catch (Exception ex) {}
+   }
+}
+
+class Gravacao implements Runnable {
+   Arquivo arq;
+   public Gravacao(Arquivo value) {
+      arq = value;
+   }
+   public void run() {
+      arq.gravar();
+   }
+}
+
+class Leitura implements Runnable {
+   Arquivo arq;
+   public Leitura(Arquivo value) {
+      arq = value;
+   }
+   public void run() {
+      arq.ler();
+   }
+}
+
+class Arquivo {
+   File file;
+
+   public Arquivo(File value) {
+      file = value;
+   }
+
+   synchronized public void ler() {
+      try {
+         if (!file.exists()){
+            wait();
+         }
+         System.out.print( "thread# "+Thread.currentThread().getName() + ">>> ");
+         if (file.exists()){
+            FileInputStream fis = new FileInputStream(file);
+            int in;
+            while ((in=fis.read())!=-1) {
+               System.out.print((char)in);
+            }
+            fis.close();
+         }
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+
+   synchronized public void gravar() {
+      try {
+         if (!file.exists()){
+            FileOutputStream fos = new FileOutputStream(file);
+            for (int i=0; i < 5; i++) {
+               fos.write( ("linha "+i).getBytes() );
+            }
+            fos.write("\n".getBytes());
+            fos.close();
+            System.out.print("Entrou no notify");
+            notify();
+         }
+      }
+      catch (Exception e) {
+         e.printStackTrace();
+      }
+   }
+}
+
+
+
+Como você pode notar, o código acima dispara 10 thread para leitura de um arquivo que muito provavelmente nem tenha sido criado, portanto as thread entram no estado wait até que a thread crie o arquivo liberando para a leitura.

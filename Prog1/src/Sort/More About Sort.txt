@@ -1,0 +1,196 @@
+http://www.cos.ufrj.br
+Prof: Ricardo Farias
+
+Heap Sort
+
+O heapsort utiliza uma estrutura de dados chamada heap binário para ordenar os elementos a medida que os insere na estrutura. Assim, ao final das inserções, os elementos podem ser sucessivamente removidos da raiz da heap, na ordem desejada.
+
+Um heap binário é uma árvore binária mantida na forma de um vetor.
+
+index   0 	1 	2 	3 	4 	5 	6
+elem   40 	90 	20 	10 	50 	70 	80
+        ====>
+          40
+       90    20
+     10 50  70 80
+
+O heap é gerado e mantido no próprio vetor a ser ordenado.
+
+Para uma ordenação crescente, deve ser construído um heap máximo (o maior elemento fica na raiz). Para uma ordenação decrescente, deve ser construído um heap mínimo (o menor elemento fica na raiz).
+
+Veja o exemplo:
+
+Observe a figura: As subárvores são analisadas e o maior elemento da subárvore é colocado na raiz.
+
+index   0 	1 	2 	3 	4 	5 	6
+elem   40 	90 	[20] 	10 	50 	70 	[80]
+
+    =====>
+      40
+  90      [20]
+10  50  70  [80]
+
+    =====>
+      40
+  90      [80]
+10  50  70  [20]
+
+    =====>
+
+index   0 	1 	2 	3 	4 	5 	6
+elem    40 	90 	[80] 	10 	50 	70 	[20]
+
+No nivel acima:
+
+index   0 	1 	2 	3 	4 	5 	6
+elem   [40] 	[90] 	20 	10 	50 	70 	80
+
+    =====>
+
+      [40]
+  [90]    20
+10  50  70  80
+
+    =====>
+
+      [90]
+  [40]    80
+10  50  70  20
+
+    =====>
+
+index   0 	1 	2 	3 	4 	5 	6
+elem    [90] 	[40] 	80 	10 	50 	70 	20
+
+Quando há troca num nó pai, suas subárvores são analisadas novamente.
+
+index   0 	1 	2 	3 	4 	5 	6
+elem   90       [40] 	20 	10 	[40] 	70 	80
+
+    =====>
+
+      90
+  [40]    20
+10  [50]  70  80
+
+    =====>
+
+      90
+  [50]    80
+10  [40]  70  20
+
+    =====>
+
+index   0 	1 	2 	3 	4 	5 	6
+elem    90 	[50] 	80 	10 	[40] 	70 	20
+
+Observe, na figura acima, que cada uma das raízes possui o maior elemento das suas respectivas subárvores. Agora a raiz será trocada com o elemento da última posição.
+
+index   0 	1 	2 	3 	4 	5 	6
+elem    [90] 	50 	80 	10 	40 	70 	[20]
+
+    =====>
+
+     [90]
+  50     80
+10  40  70  [20]
+
+    =====>
+
+      [20]
+   50    80
+10  40  70  [90]
+
+    =====>
+
+index   0 	1 	2 	3 	4 	5 	6
+elem    [20] 	50 	80 	10 	40 	70 	[90]
+
+O resultado é que o maior elemento foi colocado na última posição do vetor:
+
+        20 	50 	80 	10 	40 	70 	[90]
+
+          20
+       50    80
+    10  40  70  {90}
+
+O processo reinicia: os nodos são reavaliados de forma a colocar o maior elemento de cada subárvore na respectva raiz (a última posição fica de fora, agora).
+
+          [20]
+       50    [80]
+    10  40  70  {90}
+
+          80
+       50     [20]
+    10  40  [70]  {90}
+
+          [80]
+       50     70
+    10  40  [20]  {90}
+
+          [20]
+       50     70
+    10  40  {80}  {90}
+
+ E o Processo continua:
+
+
+
+          [20]
+       50     [70]
+    10  40  {80}  {90}
+
+
+
+          [70]
+       50     20
+    10  [40]  {80}  {90}
+
+
+
+          [40]
+     [50]      20
+   10  {70}  {80}  {90}
+
+
+
+          [50]
+     40         20
+ [10]  {70}  {80}  {90}
+
+
+
+          [10]
+   [40]          20
+ {50}  {70}  {80}  {90}
+
+
+
+          [40]
+   10          [20]
+ {50}  {70}  {80}  {90}
+
+
+
+          [20]
+     10         {40}
+ {50}  {70}  {80}  {90}
+
+
+
+          [20]
+     [10]      {40}
+ {50}  {70}  {80}  {90}
+
+
+
+           {10}
+     {20}       {40}
+ {50}  {70}  {80}  {90}
+
+
+[a] = em troca;
+{a} = na posição correta;
+
+
+

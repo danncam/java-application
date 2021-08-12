@@ -1,0 +1,38 @@
+CREATE DIRECTORY
+In the section of Java Tutorial you will learn how to create directory using java program. This program also explains the process of creating all non-existent ancestor directories automatically. We will use the class File class to crate the directory.
+
+Class File
+The File class an abstract representation of file and directory pathnames. File class is used to interact with the files system.
+
+DELETE FILE/DIRECTORY
+
+This example illustrates how to delete the specified file or directory after checking weather the file exists or not. This topic is related to the I/O (input/output) of java.io package.
+
+In this example we are using File class of java.io package. The File class is an abstract representation of file and directory pathnames. 
+
+Explanation
+
+This program deletes the specified file if that exists. We will be declaring a function called deletefile which deletes the specified directory or file.
+
+deletefile(String file)
+
+The function deletefile(String file) takes file name as parameter. The function creates a new File instance for the file name passed as parameter
+
+File f1 = new File(file);
+
+and delete the file using delete function f1.delete(); which return the Boolean value (true/false). It returns true if and only if the file or directory is successfully deleted; false otherwise.
+
+delete()
+
+    Deletes the file or directory denoted by this abstract pathname. If this pathname denotes a directory, then the directory must be empty in order to be deleted. 
+
+    Returns:
+        true if and only if the file or directory is successfully deleted; false otherwise 
+
+EXCEPTIONS     
+
+Exception, that means exceptional errors. Actually exceptions are used for handling errors in programs that occurs during the program execution. During the program execution if any error occurs and you want to print your own message or the system message about the error then you write the part of the program which generate the error in the try{} block and catch the errors using catch() block. Exception turns the direction of normal flow of the program control and send to the related catch() block. Error that occurs during the program execution generate a specific object which has the information about the errors occurred in the program.
+
+In the following example code you will see that how the exception handling can be done in java program. This example reads two integer numbers for the variables a and b. If you enter any other character except number ( 0 - 9 ) then the error is caught by NumberFormatException object. After that ex.getMessage() prints the information about the error occurring causes.
+
+

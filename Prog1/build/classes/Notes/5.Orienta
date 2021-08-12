@@ -1,0 +1,885 @@
+Capítulo 5 - Orientação a Objetos, sobreposição e substituição, construtores e tipos de retorno
+
+5.1 - Escapsulamento, relacionamentos É-UM e TEM-UM
+
+Escapsular - tem a função básica de proteger uma classe de "coisas estranhas", ou seja, mantê-la de forma mais protegida contra o uso indevido de certos usuários. Vamos ver o seguinte código para entender isso:
+
+public class Carro {
+   private float motor = 1.0f;
+
+   public setMotor( int value ) {
+      this.motor = value;
+    }
+
+    public float getMotor() {
+       return this.motor;
+    }
+}
+
+
+O código acima mostra a forma mais trivial de se proteger os membros de uma classe, ou seja, mantenha seus atributos com o modificador private (com isso o acesso se restringe a classe), e crie métodos set´s e get´s para modificar e acessar seus membros - os padrões mundiais dizem que você deve nominar seus métodos da forma acima setNomedoAtributo e getNomedoAtributo.
+Talvez você deve esta se perguntando: "pô, mas se eu pude setar diretamente a variável motor, porque eu não posso acessá-la diretamente ???" Esse é um raciocío muito bom, mas se não o teve não se preocupe, vamos entender. Imagine que a classe acima foi criada liberando o acesso direto a seus membros, dois anos após a sua criação, descobre-se que ninguém pode setar o valor de motor inferior a 1.0 (mesmo porque um carro com motor inferior a isso, nem pode ser considerado um carro!), qual a solução eminente ? Varrer todos os código que utilizam essa classe e verificar se existe erro, caso exista, conserta-se! Bom se o tempo de produção não é um diferencial em sua equipe de desenvolvimento, eu outras empresa ou lugares, as pessoas não querem perder muito tempo, com essa mudanças, pois se a classe for criada da forma acima, basta alterar o método setMotor, fazer uma condição e consertar somente ali ! Viu como o encapsulamento é uma idéia interessante !
+
+5.2 - O relacionamento É-UM refere-se a herança
+
+Quando se vê uma questão que se indage se X É-UM Y, isso quer dizer se X é uma subclasse, subtipo, estendeu de Y. Veja o código:
+
+public class Carro {}
+
+public class Mazda extends Carro {}
+
+Se você se deparar com uma questão, Mazda É-UM Carro, pode ter certeza que sim ! Agora do inverso não ! Carro É-UM Mazda !
+
+5.3 - TEM-UM referencia outra classe
+
+Quando se tem uma questão: X TEM-UM Y, quer dizer que X tem uma referencia a Y, através de um atributo, vejamos um exemplo:
+
+public class Motor { }
+public class Pneu { }
+public class Carro {
+private Motor motor;
+private Pneu[] pneu;
+}
+public class Mazda extends Carro { }
+
+
+Asserções corretas:
+
+Carro TEM-UM Motor
+Carro TEM-UM Pneu
+Mazda É-UM Carro
+
+5.4 - Substituição de método (override)
+
+5.4.1 - Substituindo um método:
+
+Substituir um método como o próprio nome já diz, significa cancelar um método de uma superclasse em uma subclasse dando-o um outro sentido, ou técnicamente, um outro código - portando infere-se que eu só posso substituir um método se houver herança caso contrário não existe substituição de método, vejamos o código:
+
+public class Empregado {
+   public double getSalario() { }
+}
+
+public class Horista extends Empregado {
+   public double getSalario() {
+   // código que retorna salário em horas
+}
+}
+
+public class Mensalista extends Empregado {
+    public double getSalario() {
+       // código que retorna salário mensal
+    }
+}
+
+
+Observe que o método getSalario nas subclasses têm comportamento distintos nas subclasses - isso devido ao fato de ter sido substituído nas subclasses. Observe ainda que o método nas subclasses se manteve idêntico ao método da superclasse no que se refere a assinatura do método (lista de argumentos) - se essa assinatura tivesse sido alterada, não seria substituição (override) e assim sobreposição ou sobrecarga (overload) - muita atenção com isso, mas estudaremos isso mais a frente.
+
+public class Empregado {
+public double getSalario() { }
+public double getSalario() { }
+}
+
+
+Qualquer tentativa de redefinição de método na mesma classe, você passará por uma vergonha incrível pelo compilador, não tente! O que define um método é sua assinatura (lista de argumento) - portanto mesmo que tente enganá-lo como o código a seguir, assuma as conseqüencias:
+
+public class Empregado {
+public double getSalario() { }
+public float getSalario() { }
+}
+
+
+Erro de compilação: getSalary() is already defined in Empregado
+
+Lembre-se sempre: O método para ser substituído deve ter a mesma assinatura (lista de argumentos) na subclasse, caso contrário, não é substituição e sim sobreposição.
+
+5.4.2 - Modificando o acesso de um método substituído
+
+Você poderá alterar a visibilidade de um método substituído, mas nunca para uma visibilidade inferior a definida na superclasse, ou seja, se você tiver um método na superclasse com o modificador protected você não poderá substituí-lo por um método com modificador private (mais restrintivo) mas para um método público por exemplo, sem nenhum problema.
+
+A ordem é:
+
+private
+padrão
+protected
+public
+
+Como podem ser substituídos:
+
+private private, padrão, protected e public
+padrão padrão, protected e public
+protected protected, public
+public public
+
+Vejamos o código:
+
+abstract class Empregado {
+    protected abstract double getSalario();
+}
+
+abstract class Horista extends Empregado {
+    public abstract double getSalario();
+}
+
+
+Veja que a classe Horista tem um método mais abrangente que o método da superclasse. Recordando ao capítulo 2, lembre-se que a primeira subclasse concreta de Horista ou Empregado deverá substituir o método getSalario() !
+
+Uma tentativa de restringir mais o código do método causa erro de compilação, como veremos o código a seguir:
+
+abstract class Empregado {
+    protected abstract double getSalario();
+}
+
+abstract class Horista extends Empregado {
+    private abstract double getSalario();
+}
+
+
+Erro de compilação: getSalario() in Horista cannot override getSalario() in Employee; attempting to assign weaker access privileges; was protected !
+
+5.4.3 - Não deve lançar exceções verificadas novas ou mais abrangentes
+
+5.4.3.1 - Exceções mais abrangentes
+
+Já discutimos o que são exceções no capítulo 4, e com certeza não precisaremos relembrar (torcemos pra isso - pois só foi um capítulo atrás). Um exceção mais abrangente é uma exceção que pode capturar mais erros, vejamos o código:
+
+abstract class Empregado {
+   abstract public double calcularComissao() throws ClassNotFoundException;
+}
+
+abstract class Horista extends Empregado {
+       abstract public double calcularComissao() throws Exception;
+}
+
+
+Na hierarquia de classes de exceções, ClassNotFoundException é subclasse de Exception, ou seja, Exception é mais abrangente que ClassNotFoundException, portanto qualquer tentativa de compilar o código acima causará um erro de compilação: [color=red:3977e586f4]calcularComissao() in Horista cannot override calcularComissao() in Empregado; overridden method does not throw java.lang.Exception ![/color:3977e586f4]
+
+5.4.3.2 - Exceções verificadas novas
+
+abstract class Empregado {
+   abstract public double calcularComissao() throws ClassNotFoundException;
+}
+
+abstract class Horista extends Empregado {
+       abstract public double calcularComissao() throws IllegalAccessException, RuntimeException;
+}
+
+
+O código acima não compila pois IllegalAccessException é uma exceção verificada e não tinha sido definida no método da superclasse, enquanto que a exceção RuntimeException não é verificada e não causará nenhum efeito, se tirarmos a declaração IllegalAccessException do método da subclasse o código acima será compilado normalmente. Você precisará saber o que é uma exceção verificada e não verificada, acrescentar exceção verificada em um sub-método gera um erro de compilação, enquanto que acrescentar uma exceção não verificada não causa nenhum efeito colateral. Se tiver alguma dúvida quanto a exceção, revise o capítulo 4.
+
+5.4.4 - Métodos finais não podem ser substituídos
+
+Revisando o capítulo 2, um método final nunca poderá ser substituído, veja o código:
+
+class Empregado {
+   private double salario;
+   final public double getSalario() {
+       return this.salario;
+   }
+}
+
+class Horista extends Empregado {
+       public double getSalario() {
+       return -1;
+   }
+}
+
+
+Erro de compilação: getSalario() in Horista cannot override getSalario() in Empregado; overridden method is final
+
+5.4.5 - Uma subclasse usará super.MetodoNome para executar o método substituído pela subclasse
+
+Isso é muito simples, examinando o código a seguir:
+
+class Empregado {
+   public double getSalario() {
+       return -1;
+   }
+}
+
+class Horista extends Empregado {
+       public double getSalario() {
+       return -2;
+   }
+   public void calcular() {
+       System.out.println("Salario da superclasse: "+super.getSalario());
+       System.out.println("Salario da subclasse: "+this.getSalario());
+   }
+   public static void main(String[] args) {
+       Horista h = new Horista();
+       h.calcular();
+   }
+}
+
+
+O resultado será:
+
+Salario da superclasse: -1.0
+Salario da subclasse: -2.0
+
+5.5 - Sobreposição/Sobrecarga de método (overload)
+
+5.5.1 - Métodos sobrepostos devem alterar a lista de argumentos
+
+Para sobrepor um método, sua assinatura deve ser diferente, pois a identificação de um método é sua assinatura (lista de argumentos), analogicamente igual ao ser humano. Vejamos o código:
+
+class Empregado {
+   public void calcularSalario() { }
+       public void calcularSalario(int value) { }
+   public void calcularSalario(long value) { }
+}
+
+
+Observe que o método calcularSalario foi definido de três forma, mas não pense assim! Pois não é o mesmo método e sim três métodos distintos, com assinaturas diferentes. Isso é muito importante pois imagine que você queira definir a lógica de negócio dos métodos somente no método sem argumentos calcularSalario(), fazendo com que os demais somente o chamem - com isso você eliminaria a redundância de código que muitas vezes nos é incomodada.
+
+5.5.2 - Tipos de retornos diferentes desde que a assinatura também seja
+
+Nenhum problema você terá com o código abaixo, visto que as assinaturas são diferentes, portanto são métodos sobrepostos.
+
+class Empregado {
+   public void calcularSalario() {   }
+       public double calcularSalario(int value) {
+       return 2.0;
+   }
+   public double calcularSalario(long value) {
+       return 1.0;
+   }
+}
+
+
+Não confunda com métodos substituídos que não podem ter assinaturas diferentes !
+
+5.5.3 - Podem ter modificadores de acesso diferentes
+
+Como são métodos distintos, cada um pode ter um modificador de acesso.
+
+class Empregado {
+   public void calcularSalario() {   }
+       protected void calcularSalario(int value) { }
+   private void calcularSalario(long value) { }
+   void calcularSalario(short value) { }
+}
+
+
+Observe que os métodos acima tem quatro modificadores diferentes.
+
+5.5.4 - Podem lançar exceções diferentes
+
+Nenhum problema você terá se lançar exceções (verificadas ou não) em métodos sobrecarregados, mas repito novamente, não confunda com os métodos substituídos, pois as regras são outras.
+
+class Empregado {
+   public void calcularSalario() throws CloneNotSupportedException { }
+       protected void calcularSalario(int value) throws IllegalAccessException { }
+   private void calcularSalario(long value) throws Exception { }
+   void calcularSalario(short value) { }
+}
+
+
+5.6 - Métodos de uma superclasse podem ser sobreposto em um subclasse
+
+Um método de uma superclasse pode perfeitamente ser sobreposto em um subclasse como você pode ver no código a seguir:
+
+abstract class Empregado {
+   abstract public void calcularSalario();
+}
+
+abstract class Horista extends Empregado {
+   abstract protected double calcularSalario(int value) throws Exception;
+}
+
+
+Observe também que fomos além, ou seja, aplicamos todas as regras de métodos sobreposto no método da classe Horista - mudamos seu modificador (protected), mudamos o retorno (double), acrescentamos uma exceção verificada, isso tudo em função da alteração da assinatura (int value). Com isso concluímos que um método sobreposto é um outro método, apesar de ter o mesmo nome, mas analogicamente quantos Joses conhecemos ? O que os identifica burocraticamente são suas assinaturas !
+
+5.7 - O polimorfismo é aplicado à substituição e não a sobreposição
+
+Essa afirmação pode parecer um pouco intrigante, mas é muito simples. Primeiro, vamos entender o que é polimorfismo. Segundo a maioria das bibliografias, polimorfismo é a capacidade que um método tem de responder de várias formas (como o próprio sentido etimológico da palavra). Bom, como aprendemos (pelo menos é o que esperamos), a sobreposição tem a função de permitir que você defina métodos distintos, ou seja, novos métodos, como você deve ter observado, na definição de polimorfismo acima, a palavra "um" foi destacada, para enfatizar bem, que é o mesmo método, único - portanto isso só pode ser aplicado à substituição. Vejamos o código abaixo para entender isso na prática:
+
+abstract class Empregado {
+    protected double salario;
+   public abstract double getSalario();
+}
+
+class Horista extends Empregado {
+   public double getSalario() {
+       return this.salario/220;
+   }
+}
+
+class Mensalista extends Empregado {
+   public double getSalario() {
+       return this.salario;
+   }
+}
+
+
+Observe que o método getSalario foi substituído (não sobreposto, a assinatura continuou idêntica), nas subclasses, mas quando você executar esse código verá que o método getSalario responderá de forma distinta quando chamado o da classe Horista e/ou da classe Mensalista. Talvez você possa estar se perguntando, "mas são métodos redefinidos, dois métodos distintos" - até podemos concondar em partes, mas existe uma mágica que você verá no código abaixo que encerrará essa questão, vejamos:
+
+abstract class Empregado {
+    protected double salario;
+   public abstract double getSalario();
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+class Horista extends Empregado {
+   public double getSalario() {
+       return this.salario/220;
+   }
+}
+
+class Mensalista extends Empregado {
+   public double getSalario() {
+       return this.salario;
+   }
+}
+
+public class Polimorfismo {
+   public static void main(String[] args) {
+      Empregado e;
+      Horista h = new Horista();
+      Mensalista m = new Mensalista();
+      h.setSalario( 2240.00 );
+      m.setSalario( 2240.00 );
+      e = h;
+      System.out.println( "Salario em horas: "+e.getSalario() );
+      e = m;
+      System.out.println( "Salario em horas: "+e.getSalario() );
+   }
+}
+
+
+Observe que na classe Polimorfismo o método e.getSalario foi chamado duas vezes no entanto o resultado desse código será:
+
+Salario em horas: 10.181818181818182
+Salario em horas: 2240.0
+
+Existe muita discussão sobre esse assunto, mas não se preocupe, absorva o que achar correto, tenha opinião!
+
+
+5.8 - Você não pode criar um novo objeto sem chamar o seu construtor
+
+Para criar uma nova instância de uma classe (um objeto) você deverá chamar o seu construtor. Existe uma particularidade definida por um padrão de projeto chamada Singleton que trata isso um pouco diferente, mas não vamos entrar nesse estudo agora, visto que não é um objetivo para quem está almeijando a certificação. A sintaxe para se criar um objeto é:
+
+ClassName x = new ClassName();
+
+Onde,
+
+ClassName - é o nome da classe ou tipo
+x - será o nome do objeto
+
+5.9 - Toda superclasse da árvore de herança de um objeto chamará um construtor
+
+Mesmo que você não defina um construtor padrão, o compilador se encarregará de fazer isso para você, independente do nível de herança de sua classe, saiba que esta sempre chama um construtor de sua superclasse imediata. Tá, sei, você está se perguntando, "pô, mas e se minha classe não herdar de ninguém ?" Toda classe a exceção da Object herda de alguma classe, se não herdar de ninguém o compilador coloca como superclasse a class java.lang.Object !
+
+5.10 - Toda classe, mesmo as classes abstratas, tem pelo menos um construtor
+
+Mesmo que você não defina um construtor para a sua classe, o compilador o fará, mesmo que sua classe seja abstrata, entenda porque. Se tivermos a hierarquia de classe a seguir:
+
+abstract class Pessoa { }
+
+abstract class PessoaFisica extends Pessoa { }
+
+abstract class Empregado extends PessoaFisica { }
+
+
+Nenhum construtor foi definido para essa classes, mas o compilador (como é camarada), modificou suas classes que ficaram assim:
+
+abstract class Pessoa {
+   public Pessoa() {
+      super();
+}
+}
+
+abstract class PessoaFisica extends Pessoa {
+   public PessoaFisica() {
+      super();
+}
+}
+
+abstract class Empregado extends PessoaFisica {
+   public Empregado() {
+      super();
+}
+}
+
+
+Você pode achar estranho, criar construtores para classes abstratas, visto que, nunca serão instanciadas, mas isso é feito para respeitar a hierarquia da pilha de construtores.
+
+5.11 - Construtores devem ter o mesmo nome da classe
+
+Qualquer tentativa de definir um construtor com um nome diferente do nome da classe, gerará erro de compilação !
+
+class Emp {
+    protected double salario;
+
+       public emp() { // nota 1
+       super();
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Erro de compilação: "invalid method declaration; return type required"
+
+O erro se deu porque houve uma tentativa de definição do construtor como um nome diferente do nome da classe, o compilador subentendeu que isso seria a definição de um método, como não foi especificado nenhum retorno (mesmo que fosse void) gerou um erro de compilação.
+
+5.12 - Construtores não podem ter tipo retornos
+
+Qualquer tentativa de especificar um tipo de retorno a um construtor, automaticamente será considerado um método com o mesmo nome da classe.
+
+class Emp {
+    protected double salario;
+
+       public void Emp() {
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Nesse caso Emp() não é um construtor e sim um método com o nome idêntico ao nome da classe.
+
+5.13 - Construtores podem ter qualquer modificador de acesso
+
+Um construtor poderá ser definido com qualquer modificador de acesso, inclusive private !
+
+class Emp {
+    protected double salario;
+
+       private Emp() {
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+5.14 - Se nenhum construtor for criado o compilador criará um padrão
+
+Se definirmos uma classe da seguinte forma:
+
+class Emp {
+    protected double salario;
+
+   public double getSalario() {
+     return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Onde está seu construtor ? Não foi especificado pelo programador, porém o compilador o criará, deixando a classe compilada da seguinte forma:
+
+class Emp {
+    protected double salario;
+
+       private Emp() {
+       super();
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Não pense que ele irá alterar o seu arquivo .java, ele só faz isso quando gerá o .class pois se você tiver um construtor padrão, o compilador não se entromete e não gera nenhum construtor.
+
+5.15 - A primeira chamada de um construtor
+
+Como boa prática de programação, um construtor deve primeiramente chamar um construtor sobrepostos com a palavra this() ou um construtor da superclasse imediata com a palavra chave super(), se não for definida explicitamente no construtor, o compilador terá o capricho de fazê-lo:
+
+class Emp {
+    protected double salario;
+
+       Emp(double value) {
+       super();
+       setSalario( value );
+   }
+
+       Emp() {
+       this(0);
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Muito interessante o que acontece nesse código, veja que existem dois modificadores, um que recebe um argumento (double value) e outro que não recebe nenhum argumento, ou seja, o programador que deseja utilizar essa classe pode instanciar essa classe de duas formas, esse exemplo mostra bem um bom caso de utilização para a sobreposição de métodos (mesmo que sejam construtores). Observe que o código de definição inicial do salário está sendo feito somente no construtor parametrizado pois quando o usuário chama um construtor sem argumento, esse chama o construtor sobreposto passando o valor 0 usando a palavra this. Com isso, podemos concluir que de qualquer forma que essa classe for instanciada, o construtor parametrizado será executado e consequentemente uma chamada a super construtor da superclasse também o será.
+
+5.16 - O compilador adicionará uma chamada super
+
+Se você definir um construtor em sua classe, o compilador não se afoitará e adicionará para você, mas como já foi falado varias vezes, um construtor deverá chamar sempre o construtor da sua superclasse (a exceção de uma chamada a um construtor sobreposto), isso porque o construtor da classe Object sempre deverá ser executado - provavelmente ele faz coisas maravilhosas que ainda não conhecemos, mas sempre, sempre mesmo, esse deverá ser executado, por isso vejamos o código a seguir:
+
+class Emp {
+    protected double salario;
+
+       Emp(double value) {
+       setSalario( value );
+   }
+
+       Emp() {
+       this(0);
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+O código de Object será executa nesse caso ? Claro que não ! Você não escreveu nenhuma chama super em nenhum construtor. Mas vamos nos atentar aos detalhes. Sabemos que essa classe é composta por dois construtores, se o usuário instancia da seguinte forma: Emp e = new Emp(240); - o objeto seria criado, setado o salário e não passaria pelo construtor sem parâmetros, pois foi chamado diretamente o construtor parametrizado, agora vejamos um outro caso, se a instanciação ocorresse da seguinte forma: Emp e = new Emp(); - nenhum parâmetro foi passado, portanto o construtor que será executado será obviamente o construtor sem parametros que chama o construtor parametrizado através da palavrinha this, que seta o valor da variável salario. Seguindo o fluxo, podemos observar que sempre o construtor parametrizado será executado, independente das formas como fora instanciado a classe, portanto a inserção da chamada ao construtor superior imediato deverá ser nesse caso no construtor parametrizado como mostra o código abaixo, mesmo porque qualquer tentativa de inserir uma chamada a super no construtor sem parametro ocasionaria um erro de compilação.
+
+class Emp {
+    protected double salario;
+
+       Emp(double value) {
+       super();
+       setSalario( value );
+   }
+
+       Emp() {
+       this(0);
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Assim geraria um erro de compilação:
+
+class Emp {
+    protected double salario;
+
+       Emp(double value) {
+       super();
+       setSalario( value );
+   }
+
+       Emp() {
+       super();
+       this(0); // Erro
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Erro de compilação: call to this must be first statement in constructor
+
+5.17 - As variáveis de instâncias só podem ser acessados após o construtor ser encerrados
+
+Nenhuma referência a variaveis de instância (do objeto) pode ser feita antes do construtor ser chamado, como mostra o código abaixo:
+
+public class Teste {
+
+       public static void main(String args[]) {
+      Emp e;
+      e.setSalario( 240 );   // Erro 1
+      }
+}
+
+
+Erro de compilação 1: variable e might not have been initialized
+
+class Emp {
+    protected double salario;
+
+       Emp(double value) {
+       super();
+       setSalario( value );
+   }
+
+       Emp() {
+       this(0);
+   }
+
+   public double getSalario() {
+       return this.salario;
+   }
+
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Se você lembra bem do capítulo 2 deve constestar isso, devido ao fato de existirem as variáveis estáticas ! Claro que não, as variáveis estáticas não são variáveis de instância (de objeto) e sim da classe !
+
+5.18 - As classe abstratas tem construtores que são chamados quando as classe concretas são instanciadas
+
+Mesmo que não as classes abstratas nunca serão instanciadas, seus construtores são executadas na pilha de execução pelas suas subclasses concretas, por isso que o compilador acrescenta caso você não os tenha acrescentado.
+
+5.19 - Interfaces não tem construtores
+
+Como as interfaces tem outro papel na orientação a objetos, elas não possuem construtores.
+
+5.20 - Construtores nunca são herdados
+
+Isso nos leva a concluir que nunca poderão ser substituídos.
+
+5.21 - Um construtor não pode ser chamado por um método da classe
+
+Os construtores nunca poderão ser chamados de métodos de uma classe, como mostra o código abaixo:
+
+class Emp {
+    private double salario;
+   public void calcular() {
+       super(0);   // Erro
+   }
+}
+
+
+Erro de compilação: call to super must be first statement in constructor !
+
+Somente através de um outro construtor:
+
+class Emp {
+    private double salario;
+       Emp(double value) {
+       super();
+       setSalario( value );
+   }
+       Emp() {
+       this(0);   // ok - um construtor pode chamar outro
+   }
+   public double getSalario() {
+       return this.salario;
+   }
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+5.22 - Regras para chamadas a construtores:
+
+5.22.1 - Deve ser a primeira instrução de um construtor
+
+class Emp {
+    private double salario;
+       Emp(double value) {
+       setSalario( value );
+       super();   // Erro
+   }
+       Emp() {
+       this(0);
+   }
+   public double getSalario() {
+       return this.salario;
+   }
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+Erro de compilação: call to super must be first statement in constructor
+
+5.22.2 - A assinatura determina qual construtor será chamado
+
+Como é permitido a sobreposição de construtores, a assinatura é que vai determinar qual o construtor será chamado.
+
+5.22.3 - Um construtor pode chamar outro
+
+Para evitar redundância de código, você pode criar vários construtores com assinaturas diferentes mas definir somente um para iniciar seu objeto realmente, onde os demais construtores somente o chamem, como mostra o código a seguir:
+
+class Emp {
+    private double salario;
+       Emp(double value) {
+       super();
+       setSalario( value );
+   }
+       Emp() {
+       this(0);
+   }
+   public void setSalario(double value) {
+       this.salario = value;
+   }
+}
+
+
+No exemplo acima, o construtor sem parâmetro está chamando o construtor na própria classe (através da palavra this) que está chamando o construtor de sua superclasse (nesse caso Object) e depois setando o valor de variável de instância salario. Note que a atribuição à variável salario poderia ser feita diretamente no código do construtor Emp(), mas se resolvêssemos adicionar algum código nos construtores dessa classe, o deveríamos fazer em dois ou mais lugares, o que causaria uma certa redundância de código, no caso acima não, o código que precisa se alterado é somente do construtor Emp(double value), pois os demais (nesse caso um) o chamam.
+
+5.22.4 - this e super não podem no mesmo construtor
+
+Você nunca poderá ter em um único construtor duas chamadas uma a this() e outra a super(). Ou você tem um ou outro, qualquer código escrito de forma que discorde dessa linha de pensamento é considerado errado, e o compilador não permitirá tal façanha.
+
+5.23 - Tipos de retorno
+
+5.23.1 - Métodos sobrepostos podem alterar seu retorno.
+
+Observe que no código abaixo houve uma sobrecarga de método, por isso o retorno pode ser alterado sem nenhum problema.
+
+abstract class Empregado {
+   abstract public int calcularReajuste(int value);
+
+   abstract public double calcularReajusta(double value);
+}
+
+
+Não tente fazer isso com substituição de métodos como mostra o código a seguir:
+
+abstract class Empregado {
+   public abstract double getSalario();
+}
+
+class Horista extends Empregado {
+   public float getSalario() {   // Erro
+      return 240f;
+   }
+}
+
+
+Erro de compilação: getSalario() in Horista cannot override getSalario() in Empregado; attempting to use incompatible return type
+
+5.23.2 - null é um valor aceitável para métodos que retornem objetos
+
+abstract class Empregado {
+   public abstract String getNome();
+}
+
+class Horista extends Empregado {
+   public String getNome() {
+       return null;
+   }
+}
+
+
+Nenhum problema no código acima.
+
+5.23.3 - Retorno de tipos primitivos
+
+Quando um método retornar um tipo primitivo, qualquer valor que poderá implicitamente convertido para o tipo do retorno, poderá ser retornado sem nenhum problema.
+
+abstract class Empregado {
+   public abstract double getSalario();
+}
+
+class Horista extends Empregado {
+   public double getSalario() {
+       float rc = 240.0f;
+       return rc;
+   }
+}
+
+
+Veja que no código acima, o retorno do método é um tipo double, no entando o que está sendo retornado é um float, como essa conversão é implícita, esse código é compilado e executado sem nenhum problema.
+
+Agora, vamos observar o seguinte código:
+
+abstract class Empregado {
+   public abstract float getSalario();
+}
+
+class Horista extends Empregado {
+   public float getSalario() {
+       double rc = 240.0;
+       return rc;   // Erro
+   }
+}
+
+
+Erro de compilação: possible loss of precision
+
+
+5.23.4 - Tipo de retorno void
+
+Um método pode não retornar nada (void), você poderá perfeitamente criar um método que não tenha nenhum retorno, basta colocar a palavra void no seu retorno, como veremos no código abaixo:
+
+public class Empregado {
+   public void calcularSalario() { }
+}
+
+
+O método acima não retorna nenhum valor, apesar de processar algum código, você ainda poderá inserir um return (sem nenhum valor) no corpo do método se quiser encerrar a sua execução antes do fluxo normal, como o código abaixo:
+
+public class Empregado {
+   public void calcularSalario() {
+      if ( this.count <= 0 ) return;
+      // faz os cálulos
+   }
+}
+
+
+O código acima, testa se a variavel count é menor ou igual a 0, se for encerra o método ! É fora de nosso foco questionar se isso é um código bem feito ou não, claro que não faríamos algo assim, mais a questão é a utilização da palavra return no meio do corpo de um método e que não retorna nada (void).
+
+Observe o código abaixo:
+
+public class Empregado {
+   public void calcularSalario() {
+   if (count <= 0) return -1;   // Erro
+   // faz os cálulos
+      }
+}
+
+
+Erro de compilação: cannot return a value from method whose result type is void
+
+Qualquer tentativa de retornar um valor em um método com o tipo de retorno void, causará um erro de compilação.
+
+5.23.5 - Retornando classes
+
+Se um método retorna uma classe X e Y é uma subclasse de X, Y pode ser retornado sem maiores problemas nesse método.
+
+Vejamos:
+
+abstract class Empregado {
+}
+
+class Horista extends Empregado {
+   public Empregado getObject() {
+       return this;
+   }
+}
+
+
+Observe que o retorno de getObject() é uma classe Empregado e o que está sendo retornado no métodos é this que refere-se a um objeto da classe Horista, e o código acima não seria nenhum problema para o grande compilador !

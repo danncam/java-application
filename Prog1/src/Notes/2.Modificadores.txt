@@ -1,0 +1,943 @@
+Capítulo 2 - Modificadores e Controle de Acesso
+
+Como em todas as linguagens de programação, a acessibilidade a uma classe/método deve seguir algumas regras, e é de extrema necessidade que você as saiba para não vacilar na hora do exame!
+
+Modificadores
+
+public
+private
+protected
+abstract
+static
+final
+transient
+strictfp
+synchronized
+volative
+native
+padrão
+
+
+LEMBRE-SE: com exceção do modificador PADRÃO, todas as demais são palavras chaves em Java.
+
+1 - MODIFICADORES PARA CLASSES:
+
+1.1 - padrão
+
+Um modificador de acesso determina como será a visibilidade de uma classe/método a partir de outras classes ou métodos.
+
+Dado o arquivo Car.java:
+
+class Car {
+ // código da classe
+}
+
+
+Observe que não foi definido nenhum modificador para a classe, portanto o modificador de acesso nesse caso é padrão (default ou friendly)! O modificador padrão define que a classe só poderá ser acessada por outra classes dentro do mesmo pacote. Uma tentativa de acesso a classe Car a partir de uma classe de outro pacote resultará em um erro de compilação.
+
+Dada as classes:
+
+Car.java
+package carros;
+class Car { ... }
+
+Oficina.java
+package oficina;
+import carros.*;
+class Oficina extends Car { ... } // Erro de compilação
+
+Conserto.java
+package conserto;
+import carros.*;
+    class Conserto {
+        public static void main(String[] args) {
+            Car c = new Car(); // Erro de compilacao
+        }
+    }
+
+
+Observe que na classe Oficina houve uma tentativa de acesso por herança, mas como a classe Car tem acesso padrão e a classe Oficina está em um pacote diferente do pacote da classe Car, causou erro de compilação. Semelhantemente o erro ocorreu na classe Conserto, apesar de que a forma de tentativa de acesso à classe Car foi através de referencia. Agora observe:
+
+Car.java
+package carros;
+class Car { ... }
+
+Oficina.java
+package carros;
+class Oficina extends Car { ... } // ok
+
+Conserto.java
+package carros;
+    class Conserto {
+        public static void main(String[] args) {
+            Car c = new Car(); // ok
+        }
+    }
+
+
+Observe que uma classe com modificar padrão pode ser acessada somente por classes/métodos do mesmo pacote.
+
+1.2 - public
+
+O modificador public é o mais liberal, ou seja, faz com que a classe possa ser acessada por qualquer classe independente de estarem ou não no mesmo pacote.
+
+Car.java
+package carros;
+    public class Car {
+        String getColor() {
+            return "yellow";
+        }
+    }
+
+Oficina.java
+package oficina;
+import carros.*;
+    public class Oficina {
+        public static void main(String[] args) {
+            Car c = new Car(); // ok
+        }
+    }
+
+
+Observe que a classe Car é publica e é visível por qualquer classe, portanto muito cuidado ao definir uma classe como pública, pode cair na vista do inimigo.
+
+1.3 - abstract
+
+Uma classe definida como abstract não permite criar instâncias dessa classe, ou seja, não podemos ter objetos de uma classe abstrata. O modificador abstract aplica o mesmo conceito de abstração que conhecemos no mundo real, ou seja, parta do pressuposto que uma classe abstrata não sabe qual seja o seu "inteiro" comportamento.
+Você deve estar se perguntando, por que então eu usaria uma classe abstrata se não posso instanciá-la ? Esse e um recurso interessantíssimo das linguagens orientadas a objetos, a extensibilidade, você pode definir uma classe Car com comportamentos (métodos) abstratos e deixar que as subclasses definam esses comportamentos de forma diferente, mesmo porque a forma de aceleração de um Mazda RX7 é bem diferente de um Fusca 1300 (putz que comparação mais esdrúxula!)
+
+Car.java
+package carros;
+public abstract class Car { ... }
+
+Oficina.java
+package carros;
+    public class Oficina {
+        public static void main(String[] args) {
+            Car c = new Car(); // Erro de compilação
+        }
+    }
+
+
+Erro de compilação: // carros.Car is abstract; cannot be instantiated
+
+Não se preocupe se você ver uma declaração: abstract public class Car
+Não é erro de sintaxe colocar o modificar abstract antes do public.
+
+Podemos concluir que uma classe abstrata não está pronta para ser usada como uma classe concreta, ou seja, ainda não sabe "coisas" sobre a classe, que muito provavelmento será implementado em subclasses (a não ser que algum programador resolva criar uma classe abstrata e não usá-la - puro capricho!)
+
+1.3 - final
+
+Um classe final não permite que se tenha subclasses, ou seja, não se pode aplicar a herança em uma classe que seja final. Novamente você como é curioso quer saber porque usaria uma classe final ? Pense em um contexto que se tenha uma classe "perfeita" que faz tudo exatamente como você definiu, e não precise que sua classe seja herdada por ninguém, para evitar que Programadores Juniores façam cacas !!! Tem mais um detalhe técnico mais importante que o citado anteriormente: uma classe final, é mais rápida que classes não final, isso porque a máquina virtual sabe que não haverá nenhuma herança (nem pelos próprios caras da Sun) por isso o processo de execução é mais rápido. Um exemplo disso é a classe String ! Porque deveríamos mexer nessa classe ? Se você ja achou alguma implementação para ela, mande seu currículo para a Sun, o endereço é: pretensao@sun.com (não sei porque está em português, sendo que são americanos):
+
+Car.java
+package carros;
+public final class Car { ... }
+
+Oficina.java
+package carros;
+    public class Oficina extends Car { // erro de compilação
+        public static void main(String[] args) {
+            Car c = new Car();
+        }
+    }
+
+Erro de compilação: cannot inherit from final carros.Car
+
+Se você é um cara esperto, já deve ter percebido que o modificador final não deve ser usado com o modificador abstract, visto porque não faz sentido temos uma classe final e abstrata ! Como faríamos a herança sendo que a classe é final !
+
+Car.java
+package carros;
+public abstract final class Car { ... } // erro de compilação
+
+
+Erro de compilação: illegal combination of modifiers: abstract and final
+
+
+1.4 - strictfp
+
+Define que membros/variáveis da classe sigam as normas do padrão IEE754 de ponto flutuante. Se você não tiver o que fazer, poderá estudar esse padrão, mas saiba que para o exame não será necessário saber nada sobre o padrão, simplesmente o que o modificador faz. Como seu escopo é a classe, todos os métodos seguiram o mesmo padrão. Você tambem poderá definir esse modificador para um método especifico, mas isso será discutido posteriormente.
+
+Car.java
+package carros;
+public strictfp class Car { ... } // ok
+
+
+Todos os métodos seguiram o padrão IEE754
+
+2 - MODIFICADORES PARA MÉTODOS:
+
+2.1 - padrão
+
+Não será necessário falar muito, pois é semelhante ao conceito de classe, ou seja, um método definido como padrão só poderá ser acessado por classes dentro do mesmo pacote.
+
+Car.java
+package carros;
+    public class Car {
+        String getColor() { método com acesso padrão
+            return "red";
+        }
+    }
+
+Oficina.java
+package carros;
+    public class Oficina {
+        public static void main(String[] args) {
+            Car c = new Car();
+            System.out.println("a cor do carro e "+c.getColor()); // ok
+        }
+    }
+
+
+Nenhum problema de acesso pois as classes estão no mesmo pacote
+
+Se definirmos a classe Oficina da seguinte forma:
+
+package oficina;
+    import carros.*;
+        public class Oficina {
+            public static void main(String[] args) {
+                Car c = new Car();
+                System.out.println("a cor do carro e "+c.getColor()); // erro de compilação
+        }
+    }
+
+
+[color=red:0fc8cb2b92]Erro de compilação: getColor() is not public in carros.Car; cannot be accessed from outside package[/color:0fc8cb2b92]
+
+2.2 - public
+
+Um método público pode ser acessado por qualquer classe em qualquer pacote. É óbvio que o acesso a um método só é permitido se você tiver primeiro acesso à classe, portanto uma tentativa de acesso a um método público de uma classe com acesso padrão não será possível a classes pertencentes a pacotes diferentes da classe que está se desejando o acesso! Se ficou confuso, não se preocupe, vai piorar !!
+
+Car.java
+package carros;
+    class Car {
+        public String getColor() {
+            return "red";
+        }
+    }
+
+Oficina.java
+package oficina;
+import carros.*;
+    class Oficina {
+        public static void main(String[] args) {
+            Car c = new Car();
+            System.out.println("a cor e "+c.getColor());  // erro de compilação
+        }
+    }
+
+
+Erro de compilação: carros.Car is not public in carros; cannot be accessed from outside package
+
+Portanto, mesmo que o método seja público (como é o caso de getColor()), a classe (nesse caso Car) também deverá ser visível ao método que está chamando !
+
+2.3 - private
+
+Um método private restringe o acesso do método somente à classe que o definiu, ou seja, um método privado só poderá ser acesso dentro da classe que o definiu e ponto final!
+
+Car.java
+package carros;
+    class Car {
+        private String getColor() { // Nota 1
+            return "red";
+    }
+
+public void imprimirCor() {
+    System.out.println( "a cor do carro e "+getColor()); // Nota 2
+    }
+}
+
+Oficina.java
+package carros;
+    class Oficina {
+        public static void main(String[] args) {
+            Car c = new Car();
+            System.out.println("a cor e "+c.getColor());  // Nota 3
+            c.imprimirCor(); // Nota 4
+        }
+    }
+
+
+Nota 1: O método foi definido como private
+Nota 2: O acesso ao método getColor está sendo feito dentro da própria classe. Isso não ocasiona erro de compilação!
+Nota 3: Uma tentativa de acesso a um método private - erro de compilação!
+Nota 4: Acesso a um método público que acesso um método private, funciona como uma interface entre o método getColor e a classe Oficina, isso é perfeitamente possível.
+
+Esse modificador é o mais restringível, os inimigos tremem quando ele é usado!
+
+2.4 - protected
+
+Ele é um pouco mais liberal que o modificador padrão, pois ele permite que um método de uma classe X definida em um pacote PX possa ser acessado por uma classe Y de um pacote PY desde que a classe Y estenda da classe X ( que confusão !!!) Não esquenta isso é bem fácil!
+
+Car.java
+package carros;
+    public class Car {
+        protected String getColor() { // Nota 1
+            return "red";
+        }
+    }
+
+Oficina.java
+package oficina;
+import carros.*;
+    class Oficina extends Car { // Nota 2
+        public void imprimirCor() {
+            System.out.println("a cor e "+getColor()); // Nota 3
+        }
+    }
+
+
+Nota 1: O método foi definido com protected
+Nota 2: A classe Oficina estende de Car - por isso os métodos protegidos podem ser acessados.
+Nota 3: O método está sendo acessado por herança, mesmo que a classe Oficina esteja definido em pacotes diferentes!
+
+Observe agora:
+
+Car.java
+package carros;
+public class Car {
+    protected String getColor() {
+        return "red";
+        }
+    }
+
+Oficina.java
+package oficina;
+import carros.*;
+class Oficina { // Nota 1
+
+    public void imprimirCor() {
+            Car c = new Car();
+            System.out.println("a cor e "+c.getColor()); // Nota 2
+        }
+    }
+
+Nota 1: A classe Oficina não estende de nenhuma superclasse.
+Nota 2: Há um tentativa de acesso por referência ao método getColor que é protegido, o que causará um erro de compilação: [color=red:0fc8cb2b92]getColor()has protected access in carros.Car[/color:0fc8cb2b92]
+
+Uma classe que herda um método protegido torna-o private para suas subclasses. Complicou ?
+
+Car.java
+package carros;
+public class Car {
+    protected String getColor() {
+        return "red";
+        }
+    }
+
+Passeio.java
+package passeio;
+import carros.*;
+    class Passeio extends Car {
+        public void imprimirCor() {
+            System.out.println("a cor e "+getColor()); // Nota 1
+        }
+    }
+
+
+Mazda.java
+package esportivo;
+import carros.*;
+    class Mazda extends Passeio {
+        public void mostrarCor() {
+            System.out.println("a cor e "+getColor()); // Nota 2
+        }
+    }
+
+
+Nota 1: O método pode ser acesso, pois herda de uma classe que o definiu como protegido.
+Nota 2: Erro de compilação, nessa hierarquia, o direito de acesso da classe Passeio ao método protegido da classe Car, não é outorgado a classe Mazda pois essa herda de Passeio, ou seja, um método protected se torna private para suas subclasses quando há herança, não permitindo que as subclasses de Passeio herdem os métodos protegidos que herdou.
+
+2.5 - abstract
+
+Um método abstrato não implementa nenhuma funcionalidade, somente assina o método e faz com que a primeira subclasse concreta seja obrigada a implementar o método. Uma classe que possua um método abstrato deve obrigatoriamente ser abstrata!
+
+Car.java
+package carros;
+    public abstract class Car { // Nota 1
+        public abstract String getColor(); // Nota 2
+    }
+
+Oficina.java
+package oficina;
+import carros.*;
+    public class Oficina extends Car { // Nota 3
+    }
+        public String getColor() {
+        return "red";
+    }
+
+
+Nota 1: A classe Car também teve que ser definida com abstract, uma vez que uma classe contenha um método abstract
+Nota 2: A definição de um método abstrato não pode ter implementação, veja que nem as chaves foram colocadas, e é assim que deve ser!
+Nota 3: A classe Oficina é uma classe concreta (não é abstrata) portanto deve implementar todos os métodos abstratos da sua superclasse, se não fizer, o compilador insultará o programador, é melhor não brincar!
+
+Erros comuns
+
+1 - Tentar implementar um método abstrato:
+
+Car.java
+package carros;
+    public abstract class Car {
+        public abstract String getColor() { ... } // Erro
+    }
+
+Erro de compilação: abstract methods cannot have a body
+
+LEMBRE-SE: Um método abstrato deve terminar com ";" e não ter as chaves !
+
+Não definir a classe como abstrata
+
+Car.java
+package carros;
+    public class Car {
+        public abstract String getColor(); // Nota 1
+    }
+
+
+Erro de compilação: carros.Car should be declared abstract; it does not define getColor() in carros.Car
+
+Não implementar os métodos abstratos na primeira subclasse concreta
+
+Car.java
+package carros;
+    public abstract class Car {
+        public abstract String getColor();
+        public abstract String getSize();
+        public double getPrice() {
+        return 24000.00;
+        }
+    }
+
+Passeio.java
+package carros;
+    public class Passeio extends Car { // Nota 1
+        public String getColor() { // Nota 2
+        return "red";
+    }
+
+
+
+Nota 1: A classe Passeio estende de Car (classe abstrata) por isso, deve implementar todos os métodos abstratos, o que não está acontecendo, se tertarmos compilar essa classe: carros.Passeio should be declared abstract; it does not define getSize() in carros.Car
+Nota 2: O método foi implementado.
+
+A regra é simples: todos os métodos abstratos devem ser implementados na primeira subclasse concreta, se definíssemos a classe Passeio como abstract no caso anterior, não teria problemas de compilação, pois o método abstratos (getSize, getColor) não precisavam ser implementados na classe Passeio e sim na primeira subclasse concreta.
+O modificador abstract não pode ser conjugado com modificador private, visto porque um método abstrato deve ser implementado em uma subclasse e um método private não é visível a nenhuma outra classe.
+
+2.6 - final
+
+Um método final define que não pode ser sobreposto, estudaremos mais afundo o que é sobreposição de métodos no capítulo 8.
+
+Car.java
+package carros;
+    public class Car {
+        public final String getColor() {   // Nota 1
+            return "red";
+        }
+    }
+
+class Mazda extends Car {
+    public String getColor() { // Nota 2
+        return "yellow";
+    }
+}
+
+
+Nota 1: Método definido com final não pode ser sobreposto.
+Nota 2: Tentativa de sobrepor um método final - o que ocasiona um erro de compilação: [color=red:0fc8cb2b92]getColor() in carros.Mazda cannot override getColor()in carros.Car; overridden method is final[/color:0fc8cb2b92]
+
+2.7 - static
+
+Um método estático define que esse pode ser executado ser que exista uma instância da classe - um objeto. Você só deve usá-lo se tiver certeza do que está fazendo.
+
+Car.java
+package carros;
+    public class Car {
+        public static String getColor() {  // Nota 1
+            return "red";
+        }
+    }
+
+
+Oficina.java
+package oficina;
+import carros.*;
+    class Oficina {
+        public static void main(String[] args) {
+            System.out.println("a cor e "+Car.getColor()); // Nota 2
+        }
+    }
+
+
+Nota 1: Método definido com static, não há necessidade de um objeto para acessá-lo.
+Nota 2: Note que não foi preciso criar um objeto para acessar o método getColor
+
+2.8 - native
+
+Define que a implementação do método foi escrita em uma linguagem nativa com por exemplo C ou C++.
+
+2.9 - strictfp
+
+Define que os valores de ponto flutuante do método devem seguir o padrão I33754, não se preocupe com esse padrão agora - saiba somente o que o modificar faz.
+
+2.10 - synchronized
+
+Faz com o método seja acessado por uma thread de cada vez, esse estudo será discutido no capítulo 9, ou seja, quando um método sincronizado estiver sendo executado por uma thread as demais deverão aguardar para iniciar a sua execução.
+
+3 - Modificadores para variáveis de instância:
+
+Apesar de muitos acharem que atributos, variável de instância e propriedades são as mesmas coisas, gostaria de deixar bem claro que existem diferenças sutis, mas que não serão relevantes nesse estudo. Por convenção chameremos de variável de instância por achar que é o termo mais correto que define esse conceito.
+
+3.1 - padrão
+
+Segue as mesmas regras de um método, ou seja, o acesso só é permitido a classes dentro do mesmo pacote.
+
+Car.java
+package carros;
+    public class Car {
+        double preco; // Nota 1
+    }
+
+Oficina.java
+package carros;
+    class Oficina {
+        public static void main(String[] args) {
+            Car c = new Car();
+            c.preco = 13990.00; // Nota 2
+        }
+    }
+
+
+Nota 1: Não foi definido nenhum modificado, portanto assume o modificador padrão
+Nota 2: Acesso a variável de instância (VI) de uma classe dentro do mesmo pacote
+
+Observe agora:
+
+Car.java
+package carros;
+    public class Car {
+        double preco; // Nota 1
+    }
+
+Oficina.java
+package oficina;
+import carros.*;
+    class Oficina {
+        public static void main(String[] args) {
+            Car c = new Car();
+            c.preco = 13990.00; // Nota 2
+        }
+    }
+
+
+Nota 1: Não foi definido nenhum modificado, portanto assume o modificador padrão
+Nota 2: Acesso não permitido para classes de pacotes diferentes. Erro de compilação: [color=red:0fc8cb2b92]preco is not public in carros.Car; cannot be accessed from outside package[/color:0fc8cb2b92]
+
+3.2 - public
+
+O acesso a uma variável de instância pública, segue as mesmas regras de um método. Só uma dica ( sem nenhum ônus) cuidado ao definir um VI pública, pois com isso você estará liberando o acesso a todo o mundo, e isso pode enfraquecer sua classe, essa decisão deve ser bem estudada, e não podemos esquecer do encapsulamento. dentro do mesmo pacote.
+
+Car.java
+package carros;
+    public class Car {
+        public double preco; // Nota 1
+    }
+
+Oficina.java
+package oficina;
+import carros.*;
+class Oficina {
+    public static void main(String[] args) {
+        Car c = new Car();
+        c.preco = 13990.00; // Nota 2
+        }
+    }
+
+
+Nota 1: Variável definida como pública, todo mundo pode acessar.
+Nota 2: Acesso a uma VI pública, compilação sem nenhum contratempo.
+
+3.3 - private
+
+Um variável private restringe o acesso somente a própria classe, é o modificador que mais limita o acesso a um membro de classe.
+
+Car.java
+package carros;
+class Oficina {
+    private String endereco;   // Nota 1
+}
+
+public class Car {
+    public static void main(String[] args) {
+        Oficina o = new Oficina();
+        System.out.println("o endereco é "+o.endereco); // Nota 2
+    }
+}
+
+
+Nota 1: Variável definida como private, acesso somente dentro da própria classe
+Nota 2: Tentativa de acesso a uma membro privado, erro de compilação: [color=red:0fc8cb2b92]endereco has private access in carros.Oficina[/color:0fc8cb2b92]
+
+O modificador private é usado para proteger uma classe do acesso direito a seus membros, com isso podemos garantir uma classe bem segura, e deve ser usado para implementação do conceito: encapsulamento.
+
+3.4 - protected
+
+Semelhante aos métodos protegidos, uma variável de instância com esse modificador, limita o acesso à subclasses para classes de outros pacotes.
+
+Pessoa.java
+package p1;
+    public class Pessoa {
+        protected String nome = "Kuesley";   // nota 1
+    }
+
+Diretor.java
+package p2;
+import p1.*;
+    public class Diretor extends Pessoa { // subclasse de Pessoa
+        public String getNome() {
+            return nome; // nota 2
+        }
+    }
+
+
+Nota 1: Membro protegido, pode ser acessador por uma subclasse, ou seja, herança.
+Nota 2: Acesso ao membro herdado, apesar da classe Diretor estar em outro pacote, note que nome foi definido como protected.
+
+Vamos mudar um pouco a classe Diretor (definida logo acima) para:
+
+Diretor.java
+package p2;
+import p1.*;
+public class Diretor {  // classe sem herança
+    public String getNome() {
+        Pessoa p = new Pessoa();
+            return p.nome; // nota 1
+        }
+    }
+
+
+Nota 1: Se tentarmos compilar a classe Diretor o compilador mostrará a mensagem: nome has protected access in p1.Pessoa
+
+3.5 - final
+
+Uma variável de instância do tipo final é usada para armazenar valores constantes que não serão e nem podem ser alterados (caso alguém resolva cair em tentação) durante o escopo de utilização da classe.
+Você deve estar se perguntando, porque usar variáveis que nunca serão alteradas ? E se no meio do contexto da classe eu precisar alterar o valor de uma variavel final ? ESQUEÇA !! Uma vez inicializada uma variável com esse modificador nunca mais poderá ser alterada. Imagine que você tenha uma classe chamada Pessoa e resolva arbitrariamente definir uma altura e peso ideal - para qualquer pessoa os valores são idênticos e não podem ser alterados, pronto, taí uma utilização para uma variável final. Talvez não tenha sido muito feliz no exemplo, mas vamos vê-lo na prática.
+
+Modelo.java
+package p1;
+    public class Modelo {
+        public final int ALTURA_IDEAL_CM = 175;
+        public final int PESO_IDEAL_KG = 75;
+    }
+
+
+Como os valores de ALTURA_IDEAL_CM e PESO_IDEAL_KG são finais, você poderá implementar métodos que usem esses valores para calcular por exemplo se uma pessoa, está ou não fora de forma, sem que algum engraçadinho fora de forma aumente o PESO_IDEAL_KG para 100 kilos. Qualquer tentativa de mudança de uma variável final resultará em alerta do compilador.
+
+O código abaixo resultará em um erro de compilação:
+
+package p2;
+import p1.*;
+    public class Diretor {
+        public static void main(String[] args) {
+            Pessoa p = new Pessoa();
+            p.PESO_IDEAL_KG = 100;
+        }
+    }
+
+
+Erro de compilação: cannot assign a value to final variable PESO_IDEAL_KG
+
+Como estamos falando de uma variavel de instância e já discutimos no capítulo 1 sobre variáveis que são inicializadas automaticamente, saiba que uma VI deve ser inicializada EXPLÍCITAMENTE pelo programador e não esperar que o compilador faça isso por você!
+Você pode realizar essa inicialização de duas maneiras: a primeira junto com a declaração como em nosso exemplo anterior e a segundo é no método constructor!
+
+Primeira Forma:
+package p1;
+    public class Pessoa {
+        public final int ALTURA_IDEAL_CM = 175;
+        public final int PESO_IDEAL_KG = 75;
+        public Pessoa() { ... } // método construtor
+    }
+
+Segunda Forma:
+
+package p1;
+    public class Pessoa {
+        public final int ALTURA_IDEAL_CM;
+        public final int PESO_IDEAL_KG;
+        public Pessoa() {
+            ALTURA_IDEAL_CM = 75;   // definido no método construtor
+            PESO_IDEAL_KG = 75;
+        }
+
+    }
+
+
+O compilador é paciente e aguarda que você inicialize até que o método construtor seja concluído, caso você tenta esquecido ou tentado enganá-lo, aguente as conseqüencias.
+
+package p1;
+public class Pessoa {
+    public final int ALTURA_IDEAL_CM;
+    public final int PESO_IDEAL_KG;
+    public Pessoa() {
+        ALTURA_IDEAL_CM = 75;      // Nota 1
+    }
+}
+
+
+Nota 1: Observe que somente o membro ALTURA_IDEAL_CM foi inicializado no construtor, e como o membro PESO_IDEAL_KG não foi inicializado explicitamente na declaração, o compilador mostrará a seguinte mensagem: variable PESO_IDEAL_KG might not have been initialized
+
+Portanto não conte com a idéia de inicialização automática mesmo que sejam tipos primitivos para variáveis com modificador final !
+
+Uma interface também pode conter variáveis de instância, e mesmo que não sejam definida explícitamente como final, ele assim será!
+
+FuncionarioPublico.java
+package p1;
+public interface FuncionarioPublico {
+    int tempoEstabilidade = 2; // Nota 1
+}
+
+
+ProcuradorEstado.java
+package p2;
+import p1.*;
+    public class ProcuradorEstado implements FuncionarioPublico {
+        public ProcuradorEstado() {
+            tempoEstabilidade = 10; // Nota 2
+        }
+    }
+
+
+Nota 1: Membro de uma interface implicitamente é public e final, observe que não foi preciso definí-lo como public para se ter o acesso a outra classe mesmo estando em outro pacote!
+Nota 2: Tentativa de alterar um membro de uma interface, como é final, o compilador mostrará a seguinte mensagem de erro: [color=red:0fc8cb2b92]cannot assign a value to final variable tempoEstabilidade[/color:0fc8cb2b92]
+
+3.6 - static
+
+Esse modificador é muito simples de se entender! Você como é um cara esperto sabe a diferença de uma classe e um objeto certo ? (Se sua resposta for negativa, procure saber antes de prosseguir!) Uma variável de instância com esse modificador é compartilhada com todas as instâncias (objetos) dessa classe, ou seja, se você tiver uma classe com um atributo estático você não terá uma cópia desse atributo para cada objeto e sim uma única cópia para todos, portanto uma alteração do valor desse atributo em qualquer dos objetos, causará efeitos sobre esse atributos para todas as instância. Por isso, um membro estático é um membro da classe e não do objeto!
+
+Pessoa.java
+package p1;
+    public class Pessoa {
+        public static int count = 0;   // Nota 1
+        private String nome;      // Nota 2
+
+        public Pessoa(String n) {   // Nota 3
+            nome = n;         // Nota 4
+            count += 1;         // Nota 5
+        }
+        public static int getCount() {   // Nota 6
+            return count;
+        }
+    }
+
+
+
+Clientes.java
+package p2;
+import p1.*;
+    public class Clientes {
+        public static void main(String[] args) {
+            System.out.println("Antes: "+Pessoa.getCount());
+            Pessoa p1 = new Pessoa("Kuesley");
+            Pessoa p2 = new Pessoa("Jose");
+            System.out.println("Depois: "+Pessoa.getCount());
+    }
+}
+
+
+Nota 1: Observe que foi criado uma variavel de instância count estático, ou seja, é único para todas as intâncias dessa classe!
+Nota 2: A VI nome não é static portando, cada instância terá um nome distinto.
+Nota 3: A classe Pessoa tem um modificador parametrizado!
+Nota 4: Atribui à VI 'nome' o valor informado na instanciação do objeto
+Nota 5: Cada vez que o construtor é chamado, é acrescentado 1 à variavel count
+Nota 6: Método que retorna o valor da variável count. Talvez você esteja se perguntando mas porque esse método é static ? Imagine que você precise chamar o método getCount sem ter nenhuma instância de Pessoa, não há problema algum em nosso exemplo tirarmos o modificador static do método getCount, mas você não poderá chamá-lo sem haver pelo menos 1 instância ! Observe também que foi usado o nome da classe para chamar os métodos e não o objetos ('Pessoa.getCount()' ) , apesar de que não haveria problema pois a JVM saberia que se trata de um méodo static e se reportaria a classe para saber as informações sobre a variável count.
+
+Observe a definição das seguintes classes:
+
+Pessoa.java
+package p1;
+public class Pessoa {
+    public static int count = 0;
+    private String nome;
+
+    public Pessoa(String n) {
+        nome = n;
+        count += 1;
+    }
+    public int getCount() {      // Removido o modificador static
+        return count;
+    }
+}
+
+Clientes.java
+package p2;
+import p1.*;
+public class Clientes {
+    public static void main(String[] args) {
+        Pessoa p1 = new Pessoa("Kuesley");
+        Pessoa p2 = new Pessoa("Jose");
+        System.out.println("Depois p1: "+p1.getCount()); // Nota 1
+        System.out.println("Depois p2: "+p2.getCount()); // Nota 2
+        System.out.println("Depois Pessoa: "+Pessoa.getCount()); // Nota 3
+    }
+}
+
+
+// Nota 1/2: Ambos retornarão 2 no método getCount()
+// Nota 3:Erro de compilação: non-static method getCount() cannot be referenced from a static context
+
+OBSERVAÇÃO: Você NUNCA poderá referenciar de um contexto estático, uma variável ou método não estático! Apesar de que isso já foi falado anteriormente, no estudo dos métodos estáticos, mas sempre é bom lembrarmos, pois os caras das provas de certificação. gostam de pegar no nosso pé quando se trata de contexto estático!
+
+Observe:
+
+package p1;
+public class Clientes {
+    int count = 0;
+    public static void main(String[] args) {
+        System.out.println(""+count);
+    }
+}
+
+
+Erro de compilação: non-static variable count cannot be referenced from a static context
+
+Se você quiser enganar o compilar da seguinte forma:
+
+package p1;
+    public class Clientes {
+        int count = 0;
+        public void imprimirLista() {
+        System.out.println(""+count);
+    }
+    public static void main(String[] args) {
+        imprimirLista();         // Nota 1
+        }
+    }
+
+
+Nota 1: O compilador saberá que está tentando ser enganado e xingará: Erro: non-static variable count cannot be referenced from a static context
+
+
+3.7 - transient
+
+Esse modificador indica a JVM para não esquentar a cabeça com as variáveis transient quando for realizar a serialização de um objeto! Calma! Calma! Calma! Se você não sabe o que é serializar um objeto, não se preocupe, por enquanto a Sun não está exigindo que você tenha esse conhecimento - apesar de ser um dos recursos mais brilhantes da linguagem Java, e é usado para a programação em ambientes distribuídos! Por isso, apresse seus estudos!
+Mesmo assim, gostaria que você tivesse uma idéia do que é serializar um objeto, pois assim acredito que fique mais fácil a compreensão desse modificador.
+Imagine que você esteja desenvolvendo uma aplicação em um ambiente de rede e precise que um objeto Pessoa seja enviado para um outra máquina da rede, e lá continue o processo com esse objeto, esse processo é conhecido como serialização, ou seja, transformar um objeto em uma sequencia de bytes e enviá-lo para outra máquina (consequentemente, outra JVM) que deserializará essa seqüencia de bytes, obtendo o objeto como na máquina de origem! Quem disse que não há milagres na informática!!!
+
+public class Pessoa {
+    public String nome;
+    public String endereco.
+    transient public Image Foto;  // Nota 1
+}
+
+
+Nota 1: Imagine que sua conexão de rede seja muito ruim! E você não precise ficar transportanto a foto da pessoa na rede, com o modificador transient o membro Foto não será serializado!
+
+3.8 - volatile
+
+Quando uma variavel de instancia com esse modificador é alterada, a threads deverá sincronizar sua cópia com a cópia principal.Não se preocupe em saber como isso funciona, estudaremos com exatidão isso no capítulo 9!
+
+Uma analogia a esse modificador é o caso dos programadores que quando alteram um projeto devem sempre alterar a documentação para que todos os demais membros da equipe estejam atualizados!
+
+IMPLEMENTAÇÃO DE INTERFACE:
+
+Você terá que saber algumas regras sobre interface para se certificar, e deverá saber de "cor e salteado" (nunca tinha citado isso) como funciona a interface Runnable ! Uma interface é uma espécie de contrato que uma classe deve fazer e cumprir para que todos fiquem felizes! Veja como é a implementação de uma interface:
+
+public interface FuncoesPublicas {
+    void assinarPonto();
+    void executarResponsabilidade();
+}
+
+
+Uma interface nada mais é que uma classe totalmente abstrata, ou seja, só existe as assinaturas de métodos!
+Apesar de não terem sidos definidos como abstract e public, convencionalmente os métodos de uma interface o são. Portanto o compilador os enxerga:
+
+public interface FuncoesPublicas {
+    public abstract void assinarPonto();
+    public abstract void executarResponsabilidade();
+}
+
+
+Apesar de não existir herança múltipla em Java para classe em Java, as interfaces podem herdar de multiplas interface, veja o código a seguir:
+
+public interface FuncaoAnimal {
+    void nascer();
+}
+
+interface FuncaoAve extends FuncaoAnimal {
+    void voar();
+}
+
+interface FuncaoReptil extends FuncaoAnimal {
+    void rastejar();
+}
+
+interface FuncaoCobraVoadora extends FuncaoAve, FuncaoReptil {  // Nota 1
+}
+
+
+Nota 1: Um interface pode herdar mais de uma interface! Não pense em fazer isso com uma classe!
+Apesar de que uma classe pode implementar várias interfaces:
+
+Vejamos:
+
+class CobraViva implements FuncaoAnimal, Runnable { ... }
+
+
+Você deve saber algumas regras quanto á declaração de constante de interface:
+
+public interface FuncoesPublicas {
+    int tempoServico = 0;
+}
+
+
+Apesar de não estar explícitamente definido mas a variável tempoServico é:
+
+public
+final
+static
+
+O equivalente a:
+
+public interface FuncoesPublicas {
+    public static final int tempoServico = 0;
+}
+
+
+
+CONSIDERAÇÕES FINAIS:
+
+Modificadores de acesso:
+
+- Os modificadores de acesso: (padrão, public, private e protected) nunca poderão ser combinados !
+
+Métodos
+- Nunca poderá ser definido como (transient, volative)
+- Um método nunca poderá ser abstract e final
+- Um método nunca poderá ser abstract e strictfp
+- Um método nunca poderá ser abstract e native
+- Um método nunca poderá ser abstract e synchronized
+- Um método nunca poderá ser abstract e private
+- Um método final nunca poderá ser sobreposto
+- Um método abstrato nunca poderá ser implementado
+- Se um método for abstrato a classe também será
+
+Variável de Instância
+- Pode ter qualquer um dos quatro modificadores de acesso
+- Podem ser (volative, transient, final, static)
+- Não pode ser (abstract, native, synchronized, strictfp)	 -
+
+Interfaces
+- Uma interface nunca herda uma classe
+- Uma classe nunca herda uma interface
+- Uma interface nunca implementa outra interface
+- Uma classe nunca implementa outra classe
+- Uma interface pode herdar várias interfaces
+- Uma variavel de uma interface sempre será implícitamente: (public, final, static)
+- Um método de uma interface sempre será (public, abstract)
+
+Lembre-se da Interface: java.lang.Runnable
+
+Apesar de que veremos ela com mais detalhes no capítulo 9 (esse é o capítulo) !
+
+Ela só tem um método: public void run();
