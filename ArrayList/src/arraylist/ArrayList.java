@@ -12,39 +12,48 @@ public class ArrayList implements List {
     }
 
     @Override
-    public void insertAtFront(Object o) {
+    public void insertAtFront(Object ob) {
         resize(start - 1);
         start = (start - 1);
-        arr[start] = o;
+        arr[start] = ob;
     }
 
     @Override
-    public void insertAtBack(Object o) {
+    public void insertAtBack(Object ob) {
         resize(end + 1);
-        arr[end] = o;
+        arr[end] = ob;
         end = (end + 1);
     }
 
     @Override
     public Object removeFromFront() {
-        if (isEmpty()) {
+        Object ob = null;
+        try {
+            ob = arr[start];
+            arr[start] = null;
+            start = (start + 1);
+            return ob;
+        } catch ( Exception emptyListException ) {
+           emptyListException.printStackTrace();
+           if (isEmpty()) 
             return null;
         }
-        Object o = arr[start];
-        arr[start] = null;
-        start = (start + 1);
-        return o;
+        return ob;
     }
 
     @Override
     public Object removeFromBack() {
-        if (isEmpty()) {
-            return null;
-        }
         end = (end - 1);
-        Object o = arr[end];
-        arr[end] = null;
-        return o;
+        Object ob = null;
+        try {
+            ob = arr[end];
+            arr[end] = null;
+        } catch ( Exception emptyListException ) {
+            emptyListException.printStackTrace();
+            if (isEmpty()) 
+             return null;
+         }
+         return ob;
     }
 
     @Override
@@ -58,6 +67,7 @@ public class ArrayList implements List {
         for (int i = 0; i < arr.length; i++) {
             arr[i] = null;
         }
+        System.out.println("List empty successfully");
     }
 
     //--------- Fora da interface.
@@ -96,18 +106,19 @@ public class ArrayList implements List {
         return null;
     }
 
-    public void set(int n, Object o) {
+    public void set(int n, Object ob) {
         if (n >= start && n < end) {
             int idx = (start + n);
-            arr[idx] = o;
+            arr[idx] = ob;
         }
     }
 
     public void print() {
-
+        if(isEmpty())
+            System.out.println("List is Empty");
         for (int i = start; i < end; i++) {
             System.out.print(arr[i] + " ");
         }
-        System.out.println("\n");
+        System.out.println("");
     }
 }

@@ -21,7 +21,7 @@ public class Game {
         snake = new Snake(Conf.length); // entrada de nível de dificuldade
         weap = new Weapon();
 
-        mus = new Sound("res/Mozart's March - Dark Moor (Metal Cover).wav");
+        mus = new Sound("res/Mozart_s March - Dark Moor (Metal Cover).wav");
         mus.play();
         mus.setRepeat(true);
 

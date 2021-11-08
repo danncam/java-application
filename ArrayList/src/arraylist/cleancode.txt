@@ -1,0 +1,58 @@
+queue.enqueue( 5 );
+      queue.print();
+      queue.enqueue( 6 );
+      queue.print();
+      queue.enqueue( 7 );
+      queue.print();
+      queue.enqueue( 8 );
+      queue.print();
+      queue.enqueue( 9 );
+      queue.print();
+      queue.enqueue( 10 );
+      queue.print();
+      queue.enqueue( 11 );
+      queue.print();
+      queue.enqueue( 12 );
+      queue.print();
+      queue.enqueue( 13 );
+      queue.print();
+      queue.enqueue( 14 );
+      queue.print();
+      queue.enqueue( 15 );
+      queue.print();
+      queue.enqueue( 16 );
+      queue.print();
+      queue.enqueue( 17 );
+      queue.print();
+      queue.enqueue( 18 );
+      queue.print();
+      queue.enqueue( 19 );
+      queue.print();
+      queue.enqueue( 20 );
+      queue.print();
+      queue.enqueue( 21 );
+      queue.print();
+      queue.enqueue( 22 );
+      queue.print();
+            removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+      removedObject = queue.dequeue();
+
+      for (int i = 0; front < arrayqueue.length; front++) {
+                newarray[i] = arrayqueue[front];
+                
+            }
+            front = 0;
+            arrayqueue = newarray;
