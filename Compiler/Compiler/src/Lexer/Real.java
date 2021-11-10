@@ -1,5 +1,8 @@
 package Lexer;
 
+/**
+ * Ponto flutuante
+ */
 public class Real extends Token{
     public final float value;
     

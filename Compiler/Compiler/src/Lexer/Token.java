@@ -1,5 +1,9 @@
 package Lexer;
 
+
+/**
+ * Classe Token define o lexema individualmente
+ */
 public class Token {
     public final int tag;
 

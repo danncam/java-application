@@ -1,5 +1,8 @@
 package Lexer;
-
+/**
+ * A classe Word gerencia lexemas para palavras reservadas,
+ * identificadores e tokens compostos
+ */
 public class Word extends Token {
     public String lexeme = "";
 

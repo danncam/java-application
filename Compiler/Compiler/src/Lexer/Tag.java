@@ -1,5 +1,9 @@
 package Lexer;
 
+
+/**
+ * Definiçao das palavras reservadas
+ * */
 public class Tag {
     public final static int 
         AND = 256,

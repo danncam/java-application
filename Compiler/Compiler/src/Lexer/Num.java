@@ -1,5 +1,8 @@
 package Lexer;
 
+/**
+ * Classe Num compõe o valor do Token
+ */
 public class Num extends Token {
     public final int value;
 
