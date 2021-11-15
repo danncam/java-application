@@ -6,6 +6,8 @@ import java.util.Hashtable;
 import Symbols.Type;
 
 public class Lexer {
+    // modif: public static int line;
+    // modif: nova sintaxe hashtable
     public static int line = 1;
     char peek;
     Hashtable<String, Word> words = new Hashtable<String, Word>();
@@ -29,6 +31,7 @@ public class Lexer {
     }
 
     void readChar(){
+        // throws trocado por try-catch 
         try {
             peek = (char) System.in.read();
         } catch (IOException e) {
@@ -38,16 +41,18 @@ public class Lexer {
     }
 
     boolean readChar(char c){
+        // cláusula throws removida
         readChar();
         if(peek != c){
             return false;
         }
-        peek = '0';
+        peek = ' '; // char vazio
         return true;
     }
 
     public Token scan() throws IOException{
         for(;; readChar()) {
+            // espaço ou quebra de linha
             if(peek == ' ' || peek == '\t')
                 continue;
                 else {
@@ -60,23 +65,41 @@ public class Lexer {
 
         switch (peek) {
             case '&':
-                if(readChar('&')) return Word.and;
-                else return new Token('&');
+                if(readChar('&')) {
+                    return Word.and;
+                } else {
+                    return new Token('&');
+                }
             case '|':
-                if(readChar('|')) return Word.and;
-                else return new Token('|');
+                if(readChar('|')) {
+                    return Word.and;
+                } else {
+                    return new Token('|');
+                }
             case '=':
-                if(readChar('&')) return Word.and;
-                else return new Token('&');
+                if(readChar('&')) {
+                    return Word.and;
+                } else {
+                    return new Token('&');
+                }
             case '!':
-                if(readChar('!')) return Word.and;
-                else return new Token('!');
+                if(readChar('!')) {
+                    return Word.and;
+                } else {
+                    return new Token('!');
+                }
             case '<':
-                if(readChar('<')) return Word.and;
-                else return new Token('<');
+                if(readChar('<')) {
+                    return Word.and;
+                } else {
+                    return new Token('<');
+                }
             case '>':
-                if(readChar('>')) return Word.and;
-                else return new Token('>');
+                if(readChar('>')) {
+                    return Word.and;
+                } else {
+                    return new Token('>');
+                }
         }
 
         if(Character.isDigit(peek)){
@@ -115,7 +138,7 @@ public class Lexer {
         }
 
         Token tok = new Token(peek);
-        peek = ' ';
+        peek = ' '; // char vazio
         return tok;
     }
 }

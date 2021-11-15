@@ -10,6 +10,7 @@ public class Do extends Stmt{
         this.stmt = null;
     }
 
+    // modif: parametros trocados
     public void init(Expr x, Stmt s){
         this.expr = x;
         this.stmt = s;
