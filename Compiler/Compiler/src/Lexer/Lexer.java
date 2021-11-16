@@ -11,6 +11,7 @@ public class Lexer {
     public static int line = 1;
     char peek;
     Hashtable<String, Word> words = new Hashtable<String, Word>();
+
     void reserve(Word word){
         words.put(word.lexeme, word);
     }
@@ -27,7 +28,6 @@ public class Lexer {
         reserve( Type.Char );
         reserve( Type.Bool );    
         reserve( Type.Float );
-        
     }
 
     void readChar(){
@@ -40,6 +40,7 @@ public class Lexer {
         }
     }
 
+    // Lê caracteres compostos
     boolean readChar(char c){
         // cláusula throws removida
         readChar();
